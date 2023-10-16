@@ -1,18 +1,44 @@
 import os
 import sys
 import json
+import random
 import pandas as pd
 
 from tqdm import tqdm
 
-def save_to_csv(path, save_path):
-    # open json
+
+def split_train(data):
+    randomized_data = random.sample(data, len(data))
+
+    index = int(len(randomized_data) * 0.8)
+
+    train_split = randomized_data[:index]
+    test_split = randomized_data[index:]
+
+    return train_split, test_split
+
+
+def open_data(path, filter_indonesian = False):
     with open(path, 'r') as f:
         data = json.load(f)
 
-    # flattening json
+    if filter_indonesian:
+        filtered_data = []
+
+        for d in tqdm(data['data']):
+            for p in d['paragraphs']:
+                for qa in p['qas']:
+                    if 'indonesian' in qa['id']:
+                        filtered_data.append(d)
+
+        return filtered_data
+
+    return data['data']
+
+
+def save_to_csv(data, save_path):
     flattened_data = []
-    for d in tqdm(data['data']):
+    for d in tqdm(data):
         title = d['title']
         for p in d['paragraphs']:
             context = p['context']
@@ -42,8 +68,18 @@ if __name__ == "__main__":
         if not os.path.exists(path):
             os.makedirs(path)
 
-    save_to_csv('Datasets/Raw/SQuAD/train.json', 'Datasets/Csv/SQuAD/train.csv')
-    save_to_csv('Datasets/Raw/SQuAD/dev.json', 'Datasets/Csv/SQuAD/dev.csv')
-    
-    save_to_csv('Datasets/Raw/TyDiQA/train.json', 'Datasets/Csv/TyDiQA/train.csv')
-    save_to_csv('Datasets/Raw/TyDiQA/dev.json', 'Datasets/Csv/TyDiQA/dev.csv')
+    squad_train_json = open_data('Datasets/Raw/SQuAD/train.json')
+    squad_dev_json = open_data('Datasets/Raw/SQuAD/dev.json') 
+    squad_train_json, squad_test_json = split_train(squad_train_json)
+
+    save_to_csv(squad_train_json, 'Datasets/Csv/SQuAD/train.csv')
+    save_to_csv(squad_dev_json, 'Datasets/Csv/SQuAD/dev.csv')
+    save_to_csv(squad_test_json, 'Datasets/Csv/SQuAD/test.csv')
+
+    tydiqa_train_json = open_data('Datasets/Raw/TyDiQA/train.json', True)
+    tydiqa_dev_json = open_data('Datasets/Raw/TyDiQA/dev.json', True) 
+    tydiqa_train_json, tydiqa_test_json = split_train(tydiqa_train_json)
+
+    save_to_csv(tydiqa_train_json, 'Datasets/Csv/TyDiQA/train.csv')
+    save_to_csv(tydiqa_dev_json, 'Datasets/Csv/TyDiQA/dev.csv')
+    save_to_csv(tydiqa_test_json, 'Datasets/Csv/TyDiQA/test.csv')

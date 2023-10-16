@@ -34,5 +34,8 @@ if __name__ == "__main__":
 
     data_preparation('Datasets/Csv/SQuAD/train.csv', 'Datasets/Processed/SQuAD/prepared_train.csv')
     data_preparation('Datasets/Csv/SQuAD/dev.csv', 'Datasets/Processed/SQuAD/prepared_dev.csv')
+    data_preparation('Datasets/Csv/SQuAD/test.csv', 'Datasets/Processed/SQuAD/prepared_test.csv')
+
     data_preparation('Datasets/Csv/TyDiQA/train.csv', 'Datasets/Processed/TyDiQA/prepared_train.csv')
     data_preparation('Datasets/Csv/TyDiQA/dev.csv', 'Datasets/Processed/TyDiQA/prepared_dev.csv')
+    data_preparation('Datasets/Csv/TyDiQA/test.csv', 'Datasets/Processed/TyDiQA/prepared_test.csv')
