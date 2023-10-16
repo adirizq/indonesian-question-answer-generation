@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 
 from tqdm import tqdm
@@ -24,6 +25,13 @@ def data_preparation(data_path, save_path):
 
 
 if __name__ == "__main__":
+
+    save_paths = ['Datasets/Processed/TyDiQA', 'Datasets/Processed/SQuAD']
+
+    for path in save_paths:
+        if not os.path.exists(path):
+            os.makedirs(path)
+
     data_preparation('Datasets/Csv/SQuAD/train.csv', 'Datasets/Processed/SQuAD/prepared_train.csv')
     data_preparation('Datasets/Csv/SQuAD/dev.csv', 'Datasets/Processed/SQuAD/prepared_dev.csv')
     data_preparation('Datasets/Csv/TyDiQA/train.csv', 'Datasets/Processed/TyDiQA/prepared_train.csv')
