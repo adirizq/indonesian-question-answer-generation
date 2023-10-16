@@ -1,3 +1,4 @@
+import os
 import sys
 import json
 import pandas as pd
@@ -18,7 +19,7 @@ def save_to_csv(path, save_path):
             for qa in p['qas']:
                 question = qa['question']
                 qa_id = qa['id'] 
-                is_impossible = qa['is_impossible'] 
+                is_impossible = qa['is_impossible'] if 'is_impossible' in qa else False
                 for answer in qa['answers']:
                     answer_text = answer['text']
                     answer_start = answer['answer_start']
@@ -33,5 +34,16 @@ def save_to_csv(path, save_path):
     # save to csv
     df.to_csv(save_path, index=False)
 
-save_to_csv('Datasets/Raw/SQuAD/train.json', 'Datasets/Csv/SQuAD/train.csv')
-save_to_csv('Datasets/Raw/SQuAD/dev.json', 'Datasets/Csv/SQuAD/dev.csv')
+
+if __name__ == "__main__":
+    save_paths = ['Datasets/Csv/TyDiQA', 'Datasets/Csv/SQuAD']
+
+    for path in save_paths:
+        if not os.path.exists(path):
+            os.makedirs(path)
+
+    save_to_csv('Datasets/Raw/SQuAD/train.json', 'Datasets/Csv/SQuAD/train.csv')
+    save_to_csv('Datasets/Raw/SQuAD/dev.json', 'Datasets/Csv/SQuAD/dev.csv')
+    
+    save_to_csv('Datasets/Raw/TyDiQA/train.json', 'Datasets/Csv/TyDiQA/train.csv')
+    save_to_csv('Datasets/Raw/TyDiQA/dev.json', 'Datasets/Csv/TyDiQA/dev.csv')
