@@ -1,7 +1,16 @@
 import os
+import nltk
 import pandas as pd
 
 from tqdm import tqdm
+
+
+def split_paragraph_into_sentences(paragraph):
+        paragraph = str(paragraph)
+        tokenizer = nltk.data.load('tokenizers/punkt/english.pickle')
+        sentences = tokenizer.tokenize(paragraph)
+
+        return sentences
 
 
 def data_preparation(data_path, save_path):
@@ -15,8 +24,8 @@ def data_preparation(data_path, save_path):
         answer_text = row['answer_text']
 
         context_answer = f"{context[:answer_start]}<hl>{answer_text}<hl>{context[(answer_start + len(str(answer_text))):]}"
-        context_key_sentence = context_answer.split('. ')
-        context_key_sentence = " ".join([ f'<hl>{s.replace("<hl>", "")}.<hl>' if "<hl>" in s else f"{s}." for s in context_key_sentence])
+        context_key_sentence = split_paragraph_into_sentences(context_answer)
+        context_key_sentence = " ".join([ f'<hl>{s.replace("<hl>", "")}<hl>' if "<hl>" in s else s for s in context_key_sentence])
 
         new_data.append({'context': row['context'], 'context_key_sentence': context_key_sentence, 'context_answer': context_answer, 'question': row['question'], 'answer': row['answer_text']})
         
