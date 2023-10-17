@@ -19,12 +19,12 @@ if __name__ == "__main__":
     seed_everything(seed=42, workers=True)
 
     parser = argparse.ArgumentParser(description='Trainer Parser')
-    parser.add_argument('--accelerator', choices=['gpu', 'cpu'], default=True, help='Use gpu for training')
+    parser.add_argument('--accelerator', choices=['gpu', 'cpu'], default='gpu', help='Use gpu for training')
 
     args = parser.parse_args()
     config = vars(args)
 
-    data_module = AnswerExtractionDataModule(dataset_name="TyDiQA", input_type="context", output_type='context_answer', batch_size=1)
+    data_module = AnswerExtractionDataModule(dataset_name="TyDiQA", input_type="context", output_type='context_answer', batch_size=1, recreate=True)
     model = BartAnswerExtraction(tokenizer=data_module.get_tokenizer())
 
     trainer = Trainer(

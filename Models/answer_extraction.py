@@ -4,6 +4,7 @@ import pytorch_lightning as pl
 
 from torch import nn
 from torch.nn import functional as F
+from indobenchmark import IndoNLGTokenizer
 from transformers import BartForConditionalGeneration
 
 
@@ -15,7 +16,7 @@ class BartAnswerExtraction(pl.LightningModule):
         self.tokenizer = tokenizer
         self.lr = learning_rate
         self.model = BartForConditionalGeneration.from_pretrained('indobenchmark/indobart-v2')
-        self.model.resize_token_embeddings(len(self.tokenizer))
+        self.model.resize_token_embeddings(len(self.tokenizer) + 1)
 
     
     def forward(self, input_ids, attention_mask, labels):
@@ -40,6 +41,8 @@ class BartAnswerExtraction(pl.LightningModule):
 
     def validation_step(self, valid_batch, batch_idx):
         input_ids, attention_mask, labels = valid_batch
+
+        print(input_ids)
 
         out = self(input_ids, attention_mask, labels)
         
