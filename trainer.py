@@ -31,7 +31,7 @@ if __name__ == "__main__":
     model = BartAnswerExtraction(tokenizer=data_module.get_tokenizer())
 
     trainer = Trainer(
-        accelerator='gpu',
+        accelerator=accelerator,
         max_epochs=1,
         log_every_n_steps=5,
         deterministic=True  # To ensure reproducible results
