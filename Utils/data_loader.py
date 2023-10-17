@@ -43,8 +43,15 @@ class AnswerExtractionDataModule(pl.LightningDataModule):
         self.valid_tensor_dataset_path = f"Datasets/Tensor/{dataset_name}_{input_type}_to_{output_type}/dev.pt"
         self.test_tensor_dataset_path = f"Datasets/Tensor/{dataset_name}_{input_type}_to_{output_type}/test.pt"
 
-        self.load_data()
+        self.tokenizer = IndoNLGTokenizer.from_pretrained(self.pre_trained_model_name)
+        self.tokenizer.add_special_tokens({'additional_special_tokens': ['<hl>']})
+
+        # Must add model.resize_token_embeddings(len(tokenizer)) after adding new special tokens
     
+
+    def tokenizer(self):
+        return self.tokenizer
+
 
     def load_data(self):
         if os.path.exists(self.train_tensor_dataset_path) and os.path.exists(self.valid_tensor_dataset_path) and os.path.exists(self.test_tensor_dataset_path) and not self.recreate:
@@ -60,11 +67,7 @@ class AnswerExtractionDataModule(pl.LightningDataModule):
         else:
 
             print('\n[ Processing Dataset ]')
-            self.tokenizer = IndoNLGTokenizer.from_pretrained(self.pre_trained_model_name)
-            self.tokenizer.add_special_tokens({'additional_special_tokens': ['<hl>']})
-
-            # Must add model.resize_token_embeddings(len(tokenizer)) after adding new special tokens
-
+            
             data_csv = {
                 'train': pd.read_csv(self.train_dataset_path),
                 'dev': pd.read_csv(self.valid_dataset_path),
