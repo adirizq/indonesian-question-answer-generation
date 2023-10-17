@@ -36,6 +36,8 @@ class BartAnswerExtraction(pl.LightningModule):
         loss = out.loss
         logits = out.logits
 
+        self.log_dict({'train_loss': loss}, prog_bar=True, on_epoch=True)
+
         return loss
 
 
@@ -46,6 +48,8 @@ class BartAnswerExtraction(pl.LightningModule):
         
         loss = out.loss
         logits = out.logits
+
+        self.log_dict({'val_loss': loss}, prog_bar=True, on_epoch=True)
 
         return loss
     
