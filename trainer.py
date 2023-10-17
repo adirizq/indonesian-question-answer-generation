@@ -31,7 +31,7 @@ if __name__ == "__main__":
 
     trainer = Trainer(
         accelerator=config['accelerator'],
-        max_epochs=1,
+        max_epochs=5,
         log_every_n_steps=5,
         deterministic=True  # To ensure reproducible results
     )

@@ -42,8 +42,6 @@ class BartAnswerExtraction(pl.LightningModule):
     def validation_step(self, valid_batch, batch_idx):
         input_ids, attention_mask, labels = valid_batch
 
-        print(input_ids)
-
         out = self(input_ids, attention_mask, labels)
         
         loss = out.loss
