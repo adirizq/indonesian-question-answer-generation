@@ -21,7 +21,7 @@ def download(url, filename):
 
 
 
-if __name__ == "main":
+if __name__ == "__main__":
     save_paths = ['Datasets/Raw/TyDiQA', 'Datasets/Raw/SQuAD']
 
     for path in save_paths:
