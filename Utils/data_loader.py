@@ -49,7 +49,7 @@ class AnswerExtractionDataModule(pl.LightningDataModule):
         # Must add model.resize_token_embeddings(len(tokenizer)) after adding new special tokens
     
 
-    def tokenizer(self):
+    def get_tokenizer(self):
         return self.tokenizer
 
 
