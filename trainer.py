@@ -20,11 +20,13 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description='Trainer Parser')
     parser.add_argument('--accelerator', choices=['gpu', 'cpu'], default='gpu', help='Use gpu for training')
+    parser.add_argument('-rd', '--recreate_dataset', choices=[0, 1], default=0, help='Use gpu for training')
 
     args = parser.parse_args()
     config = vars(args)
-
-    data_module = AnswerExtractionDataModule(dataset_name="TyDiQA", input_type="context", output_type='context_answer', batch_size=1, recreate=True)
+    
+    recreate = True if config['accelerator'] == 1 else False
+    data_module = AnswerExtractionDataModule(dataset_name="TyDiQA", input_type="context", output_type='context_answer', batch_size=1, recreate=recreate)
     model = BartAnswerExtraction(tokenizer=data_module.get_tokenizer())
 
     trainer = Trainer(
