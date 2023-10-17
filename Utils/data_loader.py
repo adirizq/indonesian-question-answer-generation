@@ -61,9 +61,6 @@ class AnswerExtractionDataModule(pl.LightningDataModule):
             test_data = torch.load(self.test_tensor_dataset_path)
             print('[ Load Completed ]')
 
-            print(train_data)
-            sys.exit()
-
             return train_data, valid_data, test_data
         
         else:

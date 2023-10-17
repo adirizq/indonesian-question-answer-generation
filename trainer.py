@@ -33,7 +33,7 @@ if __name__ == "__main__":
         accelerator=config['accelerator'],
         max_epochs=5,
         log_every_n_steps=5,
-        deterministic=True  # To ensure reproducible results
+        deterministic=True 
     )
 
     trainer.fit(model, datamodule=data_module)
