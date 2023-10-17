@@ -18,6 +18,15 @@ if __name__ == "__main__":
 
     seed_everything(seed=42, workers=True)
 
+    parser = argparse.ArgumentParser(description='Trainer Parser')
+    parser.add_argument('-gpu', type=bool, default=True, help='Use gpu for training')
+
+    args = parser.parse_args()
+    config = vars(args)
+
+    accelerator = 'gpu' if config['gpu'] else 'cpu'
+
+
     data_module = AnswerExtractionDataModule(dataset_name="TyDiQA", input_type="context", output_type='context_answer', batch_size=1)
     model = BartAnswerExtraction(tokenizer=data_module.get_tokenizer())
 
