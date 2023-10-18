@@ -61,10 +61,24 @@ class BartAnswerExtraction(pl.LightningModule):
 
         print('Predicted:')
         for o in out:
-            print(self.tokenizer.decode(o))
+            decoded = self.tokenizer.decode(o).replace('<pad>', '').replace('<s>', '').replace('</s>', '')
+            
+            try:
+                decoded = decoded.split('<hl>')[1]
+            except:
+                decoded = decoded
+
+            print(decoded)
 
         print('Actual:')
         for l in labels:
-            print(self.tokenizer.decode(l))
+            decoded = self.tokenizer.decode(l).replace('<pad>', '').replace('<s>', '').replace('</s>', '')
+            
+            try:
+                decoded = decoded.split('<hl>')[1]
+            except:
+                decoded = decoded
+
+            print(decoded)
 
         return 0
