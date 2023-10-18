@@ -19,14 +19,17 @@ if __name__ == "__main__":
     seed_everything(seed=42, workers=True)
 
     parser = argparse.ArgumentParser(description='Trainer Parser')
-    parser.add_argument('--accelerator', choices=['gpu', 'cpu'], default='gpu', help='Use gpu for training')
-    parser.add_argument('-rd', '--recreate_dataset', choices=[0, 1], default=0, help='Use gpu for training')
+    parser.add_argument('-ac', '--accelerator', choices=['gpu', 'cpu'], default='gpu', help='Use gpu for training')
+    parser.add_argument('-rd', '--recreate_dataset', default=False, help='Recreate dataset', action=argparse.BooleanOptionalAction)
+    parser.add_argument('--test', default=False, action=argparse.BooleanOptionalAction)
 
     args = parser.parse_args()
     config = vars(args)
+
+    if config['test']:
+        print('\n[ Test Mode ]\n')
     
-    recreate = True if config['accelerator'] == 1 else False
-    data_module = AnswerExtractionDataModule(dataset_name="TyDiQA", input_type="context", output_type='context_answer', batch_size=1, recreate=recreate)
+    data_module = AnswerExtractionDataModule(dataset_name="TyDiQA", input_type="context", output_type='context_answer', batch_size=1, recreate=config['recreate_dataset'], test=config['test'])
     model = BartAnswerExtraction(tokenizer=data_module.get_tokenizer())
 
     # Initialize callbacks and progressbar
@@ -40,7 +43,7 @@ if __name__ == "__main__":
         default_root_dir=f'./checkpoints',
         callbacks=[checkpoint_callback, early_stop_callback, tqdm_progress_bar],
         logger=[csv_logger],
-        max_epochs=5,
+        max_epochs= 1 if config['test'] else 5,
         log_every_n_steps=5,
         deterministic=True 
     )

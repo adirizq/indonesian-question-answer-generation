@@ -22,6 +22,7 @@ class AnswerExtractionDataModule(pl.LightningDataModule):
                  max_length=512, 
                  batch_size=32, 
                  recreate=False,
+                 test=False,
                  ) -> None:
 
         super(AnswerExtractionDataModule, self).__init__()
@@ -34,6 +35,7 @@ class AnswerExtractionDataModule(pl.LightningDataModule):
         self.max_length = max_length
         self.batch_size = batch_size
         self.recreate = recreate
+        self.test = test
         
         self.train_dataset_path = f"Datasets/Processed/{dataset_name}/prepared_train.csv"
         self.valid_dataset_path = f"Datasets/Processed/{dataset_name}/prepared_dev.csv"
@@ -46,6 +48,9 @@ class AnswerExtractionDataModule(pl.LightningDataModule):
         self.tokenizer = IndoNLGTokenizer.from_pretrained(self.pre_trained_model_name, additional_special_tokens=['<hl>', '<mask>'])
         
         # Must add model.resize_token_embeddings(len(tokenizer)) after adding new special tokens
+
+        if test:
+            self.batch_size = 3
     
 
     def get_tokenizer(self):
@@ -71,6 +76,13 @@ class AnswerExtractionDataModule(pl.LightningDataModule):
                 'train': pd.read_csv(self.train_dataset_path),
                 'dev': pd.read_csv(self.valid_dataset_path),
                 'test': pd.read_csv(self.test_dataset_path),
+            }
+
+            if self.test:
+                data_csv = {
+                'train': pd.read_csv(self.train_dataset_path)[:3],
+                'dev': pd.read_csv(self.valid_dataset_path)[:3],
+                'test': pd.read_csv(self.test_dataset_path)[:3],
             }
 
             tokenized_data = {
