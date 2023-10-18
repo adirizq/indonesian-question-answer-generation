@@ -60,9 +60,9 @@ class BartAnswerExtraction(pl.LightningModule):
         out = self.model.generate(input_ids)
 
         print('Predicted:')
-        print(self.tokenizer.decode(out))
+        print(self.tokenizer.batch_decode(out))
 
         print('Actual:')
-        print(self.tokenizer.decode(labels))
+        print(self.tokenizer.batch_decode(labels))
 
         return 0
