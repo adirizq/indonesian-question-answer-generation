@@ -4,4 +4,4 @@ pytorch_lightning
 stanza
 torch
 tqdm
-transformers
+transformers==4.28.0
