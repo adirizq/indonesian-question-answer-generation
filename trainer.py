@@ -43,7 +43,7 @@ if __name__ == "__main__":
         default_root_dir=f'./checkpoints',
         callbacks=[checkpoint_callback, early_stop_callback, tqdm_progress_bar],
         logger=[csv_logger],
-        max_epochs= 1 if config['test'] else 5,
+        max_epochs= 1 if config['test'] else 30,
         log_every_n_steps=5,
         deterministic=True 
     )
