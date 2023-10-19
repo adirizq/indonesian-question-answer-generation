@@ -85,7 +85,6 @@ class BartAnswerExtraction(pl.LightningModule):
         return (input_ids, out, labels)
     
 
-    def test_epoch_end(self, outputs):
+    def on_test_epoch_end(self, outputs):
         input_ids, out, labels = outputs
-
         print(out)
