@@ -1,4 +1,6 @@
 import sys
+from typing import List, Union
+from pytorch_lightning.utilities.types import EPOCH_OUTPUT
 import torch
 import pytorch_lightning as pl
 
@@ -59,26 +61,32 @@ class BartAnswerExtraction(pl.LightningModule):
 
         out = self.model.generate(input_ids)
 
-        print('Predicted:')
-        for o in out:
-            decoded = self.tokenizer.decode(o).replace('<pad>', '').replace('<s>', '').replace('</s>', '')
+        # print('Predicted:')
+        # for o in out:
+        #     decoded = self.tokenizer.decode(o).replace('<pad>', '').replace('<s>', '').replace('</s>', '')
             
-            try:
-                decoded = decoded.split('<hl>')[1]
-            except:
-                decoded = decoded
+        #     try:
+        #         decoded = decoded.split('<hl>')[1]
+        #     except:
+        #         decoded = decoded
 
-            print(decoded)
+        #     print(decoded)
 
-        print('Actual:')
-        for l in labels:
-            decoded = self.tokenizer.decode(l).replace('<pad>', '').replace('<s>', '').replace('</s>', '')
+        # print('Actual:')
+        # for l in labels:
+        #     decoded = self.tokenizer.decode(l).replace('<pad>', '').replace('<s>', '').replace('</s>', '')
             
-            try:
-                decoded = decoded.split('<hl>')[1]
-            except:
-                decoded = decoded
+        #     try:
+        #         decoded = decoded.split('<hl>')[1]
+        #     except:
+        #         decoded = decoded
 
-            print(decoded)
+        #     print(decoded)
 
-        return 0
+        return (input_ids, out, labels)
+    
+
+    def test_epoch_end(self, outputs):
+        input_ids, out, labels = outputs
+
+        print(out)

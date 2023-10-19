@@ -51,6 +51,7 @@ class AnswerExtractionDataModule(pl.LightningDataModule):
 
         if test:
             self.batch_size = 3
+            self.max_length=128
     
 
     def get_tokenizer(self):
