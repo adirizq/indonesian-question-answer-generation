@@ -1,6 +1,5 @@
 import sys
 from typing import List, Union
-from pytorch_lightning.utilities.types import EPOCH_OUTPUT
 import torch
 import pytorch_lightning as pl
 
