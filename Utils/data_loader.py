@@ -81,9 +81,9 @@ class AnswerExtractionDataModule(pl.LightningDataModule):
 
             if self.test:
                 data_csv = {
-                'train': pd.read_csv(self.train_dataset_path)[:3],
-                'dev': pd.read_csv(self.valid_dataset_path)[:3],
-                'test': pd.read_csv(self.test_dataset_path)[:3],
+                'train': pd.read_csv(self.train_dataset_path)[:6],
+                'dev': pd.read_csv(self.valid_dataset_path)[:6],
+                'test': pd.read_csv(self.test_dataset_path)[:6],
             }
 
             tokenized_data = {

@@ -30,7 +30,7 @@ if __name__ == "__main__":
         print('\n[ Test Mode ]\n')
     
     data_module = AnswerExtractionDataModule(dataset_name="TyDiQA", input_type="context", output_type='context_answer', batch_size=1, recreate=config['recreate_dataset'], test=config['test'])
-    model = BartAnswerExtraction(tokenizer=data_module.get_tokenizer())
+    model = BartAnswerExtraction(tokenizer=data_module.get_tokenizer(), max_length=128 if config['test'] else 512)
 
     # Initialize callbacks and progressbar
     csv_logger = CSVLogger('csv_logs', name=f'logs')
