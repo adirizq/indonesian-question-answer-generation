@@ -7,3 +7,4 @@ stanza
 torch
 tqdm
 transformers==4.28.0
+nltk==3.7
