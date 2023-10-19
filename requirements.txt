@@ -1,4 +1,5 @@
 evaluate
+rouge_score
 indobenchmark_toolkit==0.1.6
 pandas
 pytorch_lightning==2.1.0
