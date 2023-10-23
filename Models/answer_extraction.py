@@ -40,7 +40,7 @@ class BartAnswerExtraction(pl.LightningModule):
     def decode(self, text):
         decoded = self.tokenizer.decode(text).replace('<pad>', '').replace('<s>', '').replace('</s>', '')
         decoded = decoded.split('<hl>')[1] if '<hl>' in decoded else decoded
-        return decoded
+        return decoded.strip()
 
     
     def forward(self, input_ids, attention_mask, labels):
