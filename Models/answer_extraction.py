@@ -121,5 +121,6 @@ class BartAnswerExtraction(pl.LightningModule):
 
         print('\n\n[ Predictions Results ]\n')
         for d_pred, d_label in zip(self.test_step_outputs['outputs'], processed_labels):
-            print(f'{d_pred}: {d_label}') 
+            print(f'Predictions:\n{d_pred}')
+            print(f'Labels:\n{d_label}\n') 
 
