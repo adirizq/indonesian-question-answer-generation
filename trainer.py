@@ -22,6 +22,7 @@ if __name__ == "__main__":
     parser.add_argument('-ac', '--accelerator', choices=['gpu', 'cpu'], default='gpu', help='Use gpu for training')
     parser.add_argument('-rd', '--recreate_dataset', default=False, help='Recreate dataset', action=argparse.BooleanOptionalAction)
     parser.add_argument('--test', default=False, action=argparse.BooleanOptionalAction)
+    parser.add_argument('-e', '--epoch', type=int, default=30)
 
     args = parser.parse_args()
     config = vars(args)
@@ -29,13 +30,13 @@ if __name__ == "__main__":
     if config['test']:
         print('\n[ Test Mode ]\n')
     
-    data_module = AnswerExtractionDataModule(dataset_name="TyDiQA", input_type="context", output_type='context_answer', batch_size=1, recreate=config['recreate_dataset'], test=config['test'])
+    data_module = AnswerExtractionDataModule(dataset_name="TyDiQA", input_type="context", output_type='context_answer',recreate=config['recreate_dataset'], test=config['test'])
     model = BartAnswerExtraction(tokenizer=data_module.get_tokenizer(), max_length=128 if config['test'] else 512)
 
     # Initialize callbacks and progressbar
     csv_logger = CSVLogger('csv_logs', name=f'logs')
     checkpoint_callback = ModelCheckpoint(dirpath=f'./checkpoints', monitor='val_loss', mode='min')
-    early_stop_callback = EarlyStopping(monitor='val_loss', min_delta=0.00, check_on_train_epoch_end=1, patience=3, mode='min')
+    early_stop_callback = EarlyStopping(monitor='val_loss', min_delta=0.000, check_on_train_epoch_end=1, patience=3, mode='min')
     tqdm_progress_bar = TQDMProgressBar()
 
     trainer = Trainer(
@@ -44,7 +45,7 @@ if __name__ == "__main__":
         callbacks=[checkpoint_callback, early_stop_callback, tqdm_progress_bar],
         logger=[csv_logger],
         max_epochs= 1 if config['test'] else 30,
-        log_every_n_steps=5,
+        log_every_n_steps= config['epoch'],
         deterministic=True 
     )
 

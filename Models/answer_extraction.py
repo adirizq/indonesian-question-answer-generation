@@ -24,7 +24,13 @@ class BartAnswerExtraction(pl.LightningModule):
         self.meteor = evaluate.load('meteor')
         self.rouge = evaluate.load('rouge')
 
-        self.test_step_outpus = {
+        self.test_step_outputs = {
+          'input_ids': [],
+          'outputs': [],
+          'labels': [],
+        }
+
+        self.valid_step_outputs ={
           'input_ids': [],
           'outputs': [],
           'labels': [],
@@ -77,52 +83,38 @@ class BartAnswerExtraction(pl.LightningModule):
 
         out = self.model.generate(input_ids)
 
-        self.test_step_outpus['input_ids'].append(input_ids)
-        self.test_step_outpus['outputs'].append(out)
-        self.test_step_outpus['labels'].append(labels)
+        for idx in range(len(input_ids)):
+            self.test_step_outputs['input_ids'].append(self.decode(input_ids[idx]))
+            self.test_step_outputs['outputs'].append(self.decode(out[idx]))
+            self.test_step_outputs['labels'].append(self.decode(labels[idx]))
 
         return 0
     
 
     def on_test_epoch_end(self):
-        input_ids = torch.cat(self.test_step_outpus['input_ids'], dim=0)
-        outputs = torch.cat(self.test_step_outpus['outputs'], dim=0)
-        labels = torch.cat(self.test_step_outpus['labels'], dim=0)
+        label_dict = {}
+        processed_labels = [] 
 
-        decoded_inputs = []
-        decoded_outputs = []
-        decoded_labels = []
+        for d_input, d_label in zip(self.test_step_outputs['input_ids'], self.test_step_outputs['labels']):
+          if not d_label in label_dict:
+            label_dict[d_input] = []
+          label_dict[d_input].append(d_label)
 
-        decoded_inputs_labels  = {}
-
-        for idx in range(len(input_ids)):
-            decoded_input = self.decode(input_ids[idx])
-            decoded_output = self.decode(outputs[idx])
-
-            decoded_inputs.append(decoded_input)
-            decoded_outputs.append(decoded_output)
-
-            if not decoded_input in decoded_inputs_labels:
-                decoded_inputs_labels[decoded_input] = []
-            
-            decoded_inputs_labels[decoded_input].append(self.decode(labels[idx]))
-
-        for decoded_input in decoded_inputs:
-            decoded_labels.append(decoded_inputs_labels[decoded_input])
+        for d_input in self.test_step_outputs['input_ids']:
+          processed_labels.append(label_dict[d_input])
         
-
-        score_bleu = self.bleu.compute(predictions=decoded_inputs, references=decoded_labels)["bleu"]
-        score_meteor = self.meteor.compute(predictions=decoded_inputs, references=decoded_labels)["meteor"]
-        score_rouge = self.rouge.compute(predictions=decoded_inputs, references=decoded_labels)
+        score_bleu = self.bleu.compute(predictions=self.test_step_outputs['input_ids'], references=processed_labels)["bleu"]
+        score_meteor = self.meteor.compute(predictions=self.test_step_outputs['input_ids'], references=processed_labels)["meteor"]
+        score_rouge = self.rouge.compute(predictions=self.test_step_outputs['input_ids'], references=processed_labels)
         score_rouge1 = score_rouge['rouge1']
         score_rouge2 = score_rouge['rouge2']
         score_rougeL = score_rouge['rougeL']
         score_rougeLsum = score_rouge['rougeLsum']
 
-        print('\n[ Test Results ]\n')
+        print('\n\n[ Test Results ]\n')
         print(f'Bleu: {score_bleu}')
         print(f'Meteor: {score_meteor}')
         print(f'Rouge1: {score_rouge1}')
         print(f'Rouge2: {score_rouge2}')
         print(f'RougeL: {score_rougeL}')
-        print(f'RougeLsum: {score_rougeLsum}')
+        print(f'RougeLsum: {score_rougeLsum}\n\n')

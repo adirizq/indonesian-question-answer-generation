@@ -20,7 +20,7 @@ class AnswerExtractionDataModule(pl.LightningDataModule):
                  output_type,
                  pre_trained_model_name='indobenchmark/indobart-v2', 
                  max_length=512, 
-                 batch_size=32, 
+                 batch_size=10, 
                  recreate=False,
                  test=False,
                  ) -> None:
@@ -50,7 +50,6 @@ class AnswerExtractionDataModule(pl.LightningDataModule):
         # Must add model.resize_token_embeddings(len(tokenizer)) after adding new special tokens
 
         if test:
-            self.batch_size = 3
             self.max_length=128
     
 
@@ -81,9 +80,9 @@ class AnswerExtractionDataModule(pl.LightningDataModule):
 
             if self.test:
                 data_csv = {
-                'train': pd.read_csv(self.train_dataset_path)[:6],
-                'dev': pd.read_csv(self.valid_dataset_path)[:6],
-                'test': pd.read_csv(self.test_dataset_path)[:6],
+                'train': pd.read_csv(self.train_dataset_path)[:123],
+                'dev': pd.read_csv(self.valid_dataset_path)[:123],
+                'test': pd.read_csv(self.test_dataset_path)[:123],
             }
 
             tokenized_data = {
