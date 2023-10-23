@@ -103,9 +103,9 @@ class BartAnswerExtraction(pl.LightningModule):
         for d_input in self.test_step_outputs['input_ids']:
           processed_labels.append(label_dict[d_input])
         
-        score_bleu = self.bleu.compute(predictions=self.test_step_outputs['input_ids'], references=processed_labels)["bleu"]
-        score_meteor = self.meteor.compute(predictions=self.test_step_outputs['input_ids'], references=processed_labels)["meteor"]
-        score_rouge = self.rouge.compute(predictions=self.test_step_outputs['input_ids'], references=processed_labels)
+        score_bleu = self.bleu.compute(predictions=self.test_step_outputs['outputs'], references=processed_labels)["bleu"]
+        score_meteor = self.meteor.compute(predictions=self.test_step_outputs['outputs'], references=processed_labels)["meteor"]
+        score_rouge = self.rouge.compute(predictions=self.test_step_outputs['outputs'], references=processed_labels)
         score_rouge1 = score_rouge['rouge1']
         score_rouge2 = score_rouge['rouge2']
         score_rougeL = score_rouge['rougeL']
@@ -118,3 +118,8 @@ class BartAnswerExtraction(pl.LightningModule):
         print(f'Rouge2: {score_rouge2}')
         print(f'RougeL: {score_rougeL}')
         print(f'RougeLsum: {score_rougeLsum}\n\n')
+
+        print('\n\n[ Predictions Results ]\n')
+        for d_pred, d_label in zip(self.test_step_outputs['outputs'], processed_labels):
+            print(f'{d_pred}: {d_label}') 
+
