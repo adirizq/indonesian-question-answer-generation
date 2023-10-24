@@ -5,6 +5,7 @@ import torch
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
 
+from pathlib import Path
 from textwrap import dedent
 from pytorch_lightning.loggers import CSVLogger
 from pytorch_lightning import Trainer, seed_everything
@@ -102,6 +103,9 @@ if __name__ == "__main__":
 
     trainer.fit(model, datamodule=data_module)
     trainer.test(datamodule=data_module, ckpt_path='best')
+
+    Path(f'./pretrained/hf_ae_{pretrained_model_type}_{dataset}_{input_type}_to_{output_type}').mkdir(parents=True, exist_ok=True)
+    Path(f'./pretrained/pt_ae_{pretrained_model_type}_{dataset}_{input_type}_to_{output_type}').mkdir(parents=True, exist_ok=True)
 
     model.save_pretrained(f'./pretrained/hf_ae_{pretrained_model_type}_{dataset}_{input_type}_to_{output_type}')
     torch.save(model.state_dict(), f'./pretrained/pt_ae_{pretrained_model_type}_{dataset}_{input_type}_to_{output_type}/pretrained.pth')
