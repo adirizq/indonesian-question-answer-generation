@@ -130,14 +130,6 @@ class BartAnswerExtraction(pl.LightningModule):
         score_rougeL = score_rouge['rougeL']
         score_rougeLsum = score_rouge['rougeLsum']
 
-        print('\n\n[ Test Results ]\n')
-        print(f'Bleu: {score_bleu}')
-        print(f'Meteor: {score_meteor}')
-        print(f'Rouge1: {score_rouge1}')
-        print(f'Rouge2: {score_rouge2}')
-        print(f'RougeL: {score_rougeL}')
-        print(f'RougeLsum: {score_rougeLsum}\n\n')
-
         print(dedent(f'''
         -----------------------------------------------
                 Answer Extraction Test Result        
