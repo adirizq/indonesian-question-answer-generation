@@ -20,6 +20,7 @@ class QAGModel(pl.LightningModule):
         self.output_type = output_type
         self.model_task = model_task
         self.lr = learning_rate
+        self.max_length = max_length
         self.model = BartForConditionalGeneration.from_pretrained('indobenchmark/indobart-v2')
         self.model.resize_token_embeddings(len(self.tokenizer) + 1)
         self.model.config.max_length = max_length
@@ -105,7 +106,7 @@ class QAGModel(pl.LightningModule):
     def test_step(self, test_batch, batch_idx):
         input_ids, attention_mask, labels = test_batch
 
-        out = self.model.generate(input_ids)
+        out = self.model.generate(input_ids, max_new_tokens=self.max_length)
 
         for idx in range(len(input_ids)):
             self.test_step_outputs['input_ids'].append(self.decode(input_ids[idx]))
