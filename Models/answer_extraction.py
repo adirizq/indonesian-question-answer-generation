@@ -48,6 +48,17 @@ class BartAnswerExtraction(pl.LightningModule):
         decoded = self.tokenizer.decode(text).replace('<pad>', '').replace('<s>', '').replace('</s>', '')
         decoded = decoded.split('<hl>')[1] if '<hl>' in decoded else decoded
         return decoded.strip()
+    
+
+    def exact_match_evaluation(predictions, references):
+        assert len(predictions) == len(references), "The number of predictions and references should be the same"
+        
+        exact_matches = 0
+        for pred, refs in zip(predictions, references):
+            if pred in refs:
+                exact_matches += 1
+        
+        return exact_matches / len(predictions)
 
     
     def forward(self, input_ids, attention_mask, labels):
@@ -110,6 +121,7 @@ class BartAnswerExtraction(pl.LightningModule):
         for d_input in self.test_step_outputs['input_ids']:
           processed_labels.append(label_dict[d_input])
         
+        score_exact_match = self.exact_match_evaluation(predictions=self.test_step_outputs['outputs'], references=processed_labels)
         score_bleu = self.bleu.compute(predictions=self.test_step_outputs['outputs'], references=processed_labels)["bleu"]
         score_meteor = self.meteor.compute(predictions=self.test_step_outputs['outputs'], references=processed_labels)["meteor"]
         score_rouge = self.rouge.compute(predictions=self.test_step_outputs['outputs'], references=processed_labels)
@@ -128,12 +140,13 @@ class BartAnswerExtraction(pl.LightningModule):
 
         print(dedent(f'''
         -----------------------------------------------
-            Answer Extraction Test Result        
+                Answer Extraction Test Result        
         -----------------------------------------------
         Name                | Value       
         -----------------------------------------------
         Input Type          | {self.input_type}
         Output Type         | {self.output_type}
+        Exact Match         | {score_exact_match}
         Bleu                | {score_bleu}
         Meteor              | {score_meteor}
         Rouge1              | {score_rouge1}
@@ -144,7 +157,11 @@ class BartAnswerExtraction(pl.LightningModule):
 
         '''))
 
-        print('\n\n[ Predictions Results ]\n')
+        print(dedent(f'''
+        -----------------------------------------------
+              Answer Extraction Prediction Result        
+        -----------------------------------------------
+        '''))
         for d_pred, d_label in zip(self.test_step_outputs['outputs'], processed_labels):
             print(f'Predictions:\n{d_pred}')
             print(f'Labels:\n{d_label}\n') 
