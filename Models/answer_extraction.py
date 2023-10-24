@@ -50,7 +50,7 @@ class BartAnswerExtraction(pl.LightningModule):
         return decoded.strip()
     
 
-    def exact_match_evaluation(predictions, references):
+    def exact_match_evaluation(self, predictions, references):
         assert len(predictions) == len(references), "The number of predictions and references should be the same"
         
         exact_matches = 0
