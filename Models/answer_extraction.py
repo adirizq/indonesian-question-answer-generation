@@ -1,9 +1,10 @@
 import sys
-import evaluate
 import torch
+import evaluate
 import pytorch_lightning as pl
 
 from torch import nn
+from textwrap import dedent
 from torch.nn import functional as F
 from indobenchmark import IndoNLGTokenizer
 from transformers import BartForConditionalGeneration
@@ -11,10 +12,12 @@ from transformers import BartForConditionalGeneration
 
 class BartAnswerExtraction(pl.LightningModule):
     
-    def __init__(self, tokenizer, learning_rate=1e-5, max_length=512) -> None:
+    def __init__(self, tokenizer, input_type, output_type, learning_rate=1e-5, max_length=512) -> None:
         super(BartAnswerExtraction, self).__init__()
 
         self.tokenizer = tokenizer
+        self.input_type = input_type
+        self.output_type = output_type
         self.lr = learning_rate
         self.model = BartForConditionalGeneration.from_pretrained('indobenchmark/indobart-v2')
         self.model.resize_token_embeddings(len(self.tokenizer) + 1)
@@ -39,7 +42,7 @@ class BartAnswerExtraction(pl.LightningModule):
     
     def save_pretrained(self, save_path):
         self.model.save_pretrained(save_path)
-        
+
     
     def decode(self, text):
         decoded = self.tokenizer.decode(text).replace('<pad>', '').replace('<s>', '').replace('</s>', '')
@@ -122,6 +125,24 @@ class BartAnswerExtraction(pl.LightningModule):
         print(f'Rouge2: {score_rouge2}')
         print(f'RougeL: {score_rougeL}')
         print(f'RougeLsum: {score_rougeLsum}\n\n')
+
+        print(dedent(f'''
+        -----------------------------------------------
+            Answer Extraction Test Result        
+        -----------------------------------------------
+        Name                | Value       
+        -----------------------------------------------
+        Input Type          | {self.input_type}
+        Output Type         | {self.output_type}
+        Bleu                | {score_bleu}
+        Meteor              | {score_meteor}
+        Rouge1              | {score_rouge1}
+        Rouge2              | {score_rouge2}
+        RougeL              | {score_rougeL}
+        RougeLsum           | {score_rougeLsum}
+        -----------------------------------------------
+
+        '''))
 
         print('\n\n[ Predictions Results ]\n')
         for d_pred, d_label in zip(self.test_step_outputs['outputs'], processed_labels):

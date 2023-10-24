@@ -5,10 +5,10 @@ import torch
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
 
+from textwrap import dedent
+from pytorch_lightning.loggers import CSVLogger
 from pytorch_lightning import Trainer, seed_everything
 from pytorch_lightning.callbacks import ModelCheckpoint, TQDMProgressBar, EarlyStopping
-from pytorch_lightning.loggers import CSVLogger
-from textwrap import dedent
 
 from Utils.data_loader import AnswerExtractionDataModule
 from Models.answer_extraction import BartAnswerExtraction
@@ -60,6 +60,8 @@ if __name__ == "__main__":
      Model Type          | {model_type}
      Pretrained Model    | {pretrained_model_type}
      Dataset             | {dataset}
+     Input Type          | {input_type}
+     Output Type         | {output_type}
      Batch Size          | {batch_size}
      Learning Rate       | {learning_rate}
      Input Max Length    | {max_length}  
@@ -78,7 +80,9 @@ if __name__ == "__main__":
     
     model = BartAnswerExtraction(tokenizer=data_module.get_tokenizer(), 
                                  max_length=max_length,
-                                 learning_rate=learning_rate
+                                 learning_rate=learning_rate,
+                                 input_type=input_type,
+                                 output_type=output_type,
                                  )
 
     csv_logger = CSVLogger(f'csv_logs', name=f'ae_{pretrained_model_type}_{dataset}_{input_type}_to_{output_type}')
