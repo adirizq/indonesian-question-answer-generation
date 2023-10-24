@@ -10,14 +10,15 @@ from indobenchmark import IndoNLGTokenizer
 from transformers import BartForConditionalGeneration
 
 
-class BartAnswerExtraction(pl.LightningModule):
+class QAGModel(pl.LightningModule):
     
-    def __init__(self, tokenizer, input_type, output_type, learning_rate=1e-5, max_length=512) -> None:
-        super(BartAnswerExtraction, self).__init__()
+    def __init__(self, tokenizer, input_type, output_type, model_task, learning_rate=1e-5, max_length=512) -> None:
+        super(QAGModel, self).__init__()
 
         self.tokenizer = tokenizer
         self.input_type = input_type
         self.output_type = output_type
+        self.model_task = model_task
         self.lr = learning_rate
         self.model = BartForConditionalGeneration.from_pretrained('indobenchmark/indobart-v2')
         self.model.resize_token_embeddings(len(self.tokenizer) + 1)
@@ -37,6 +38,11 @@ class BartAnswerExtraction(pl.LightningModule):
           'input_ids': [],
           'outputs': [],
           'labels': [],
+        }
+
+        self.model_task_inf = {
+            'ae': 'Answer Extraction',
+            'qg': 'Question Generator'
         }
 
     
@@ -132,7 +138,7 @@ class BartAnswerExtraction(pl.LightningModule):
 
         print(dedent(f'''
         -----------------------------------------------
-                Answer Extraction Test Result        
+                {self.model_task_inf[self.model_task]} Test Result        
         -----------------------------------------------
         Name                | Value       
         -----------------------------------------------
@@ -151,7 +157,7 @@ class BartAnswerExtraction(pl.LightningModule):
 
         print(dedent(f'''
         -----------------------------------------------
-              Answer Extraction Prediction Result        
+              {self.model_task_inf[self.model_task]} Prediction Result        
         -----------------------------------------------
         '''))
         for d_pred, d_label in zip(self.test_step_outputs['outputs'], processed_labels):

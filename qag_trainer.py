@@ -12,7 +12,7 @@ from pytorch_lightning import Trainer, seed_everything
 from pytorch_lightning.callbacks import ModelCheckpoint, TQDMProgressBar, EarlyStopping
 
 from Utils.data_loader import AnswerExtractionDataModule
-from Models.answer_extraction import BartAnswerExtraction
+from Models.qag_model import QAGModel
 
 
 if __name__ == "__main__":
@@ -24,8 +24,9 @@ if __name__ == "__main__":
     parser.add_argument('-rd', '--recreate_dataset', default=False, help='Recreate dataset for data loader', action=argparse.BooleanOptionalAction)
     parser.add_argument('-t', '--test', default=False, help='Test mode', action=argparse.BooleanOptionalAction)
     parser.add_argument('-e', '--max_epochs', type=int, default=30, help='Max epochs for training')
-    parser.add_argument('-i', '--input_type', choices=['context_key_sentence', 'context'], required=True, help='Input type for training')
-    parser.add_argument('-o', '--output_type', choices=['context_answer', 'answer'], required=True, help='Output type training')
+    parser.add_argument('-m', '--model_task', choices=['ae', 'qg'], required=True, help='Model task for training')
+    parser.add_argument('-i', '--input_type', choices=['context_key_sentence', 'context', 'context_answer'], required=True, help='Input type for training')
+    parser.add_argument('-o', '--output_type', choices=['context_answer', 'answer', 'question'], required=True, help='Output type training')
 
     args = parser.parse_args()
     config = vars(args)
@@ -34,6 +35,7 @@ if __name__ == "__main__":
     recreate_dataset = config['recreate_dataset']
     is_test = config['test']
     max_epochs = 1 if is_test else config['max_epochs']
+    model_task = config['model_task']
     input_type = config['input_type']
     output_type = config['output_type']
     model_type = 'BART'
@@ -42,6 +44,11 @@ if __name__ == "__main__":
     batch_size = 10
     learning_rate = 1e-5
     max_length = 128 if is_test else 512
+
+    model_task_inf = {
+        'ae': 'Answer Extraction',
+        'qg': 'Question Generator'
+    }
 
     if is_test:
         print(dedent(f'''
@@ -54,7 +61,7 @@ if __name__ == "__main__":
 
     print(dedent(f'''
     -----------------------------------------------
-          Answer Extraction Train Information        
+          {model_task_inf[model_task]} Train Information        
     -----------------------------------------------
      Name                | Value       
     -----------------------------------------------
@@ -79,21 +86,22 @@ if __name__ == "__main__":
                                              test=is_test
                                              )
     
-    model = BartAnswerExtraction(tokenizer=data_module.get_tokenizer(), 
-                                 max_length=max_length,
-                                 learning_rate=learning_rate,
-                                 input_type=input_type,
-                                 output_type=output_type,
-                                 )
+    model = QAGModel(tokenizer=data_module.get_tokenizer(), 
+                     max_length=max_length,
+                     learning_rate=learning_rate,
+                     input_type=input_type,
+                     output_type=output_type,
+                     model_task=model_task
+                     )
 
-    csv_logger = CSVLogger(f'csv_logs', name=f'ae_{pretrained_model_type}_{dataset}_{input_type}_to_{output_type}')
-    checkpoint_callback = ModelCheckpoint(dirpath=f'./checkpoints/ae_{pretrained_model_type}_{dataset}_{input_type}_to_{output_type}', monitor='val_loss', mode='min')
+    csv_logger = CSVLogger(f'csv_logs', name=f'{model_task}_{pretrained_model_type}_{dataset}_{input_type}_to_{output_type}')
+    checkpoint_callback = ModelCheckpoint(dirpath=f'./checkpoints/{model_task}_{pretrained_model_type}_{dataset}_{input_type}_to_{output_type}', monitor='val_loss', mode='min')
     early_stop_callback = EarlyStopping(monitor='val_loss', min_delta=0.000, check_on_train_epoch_end=1, patience=3, mode='min')
     tqdm_progress_bar = TQDMProgressBar()
 
     trainer = Trainer(
         accelerator=accelerator,
-        default_root_dir=f'./checkpoints/ae_{pretrained_model_type}_{dataset}_{input_type}_to_{output_type}',
+        default_root_dir=f'./checkpoints/{model_task}_{pretrained_model_type}_{dataset}_{input_type}_to_{output_type}',
         callbacks=[checkpoint_callback, early_stop_callback, tqdm_progress_bar],
         logger=[csv_logger],
         max_epochs=max_epochs,
@@ -104,8 +112,8 @@ if __name__ == "__main__":
     trainer.fit(model, datamodule=data_module)
     trainer.test(datamodule=data_module, ckpt_path='best')
 
-    Path(f'./pretrained/hf_ae_{pretrained_model_type}_{dataset}_{input_type}_to_{output_type}').mkdir(parents=True, exist_ok=True)
-    Path(f'./pretrained/pt_ae_{pretrained_model_type}_{dataset}_{input_type}_to_{output_type}').mkdir(parents=True, exist_ok=True)
+    Path(f'./pretrained/hf_{model_task}_{pretrained_model_type}_{dataset}_{input_type}_to_{output_type}').mkdir(parents=True, exist_ok=True)
+    Path(f'./pretrained/pt_{model_task}_{pretrained_model_type}_{dataset}_{input_type}_to_{output_type}').mkdir(parents=True, exist_ok=True)
 
-    model.save_pretrained(f'./pretrained/hf_ae_{pretrained_model_type}_{dataset}_{input_type}_to_{output_type}')
-    torch.save(model.state_dict(), f'./pretrained/pt_ae_{pretrained_model_type}_{dataset}_{input_type}_to_{output_type}/pretrained.pth')
+    model.save_pretrained(f'./pretrained/hf_{model_task}_{pretrained_model_type}_{dataset}_{input_type}_to_{output_type}')
+    torch.save(model.state_dict(), f'./pretrained/pt_{model_task}_{pretrained_model_type}_{dataset}_{input_type}_to_{output_type}/pretrained.pth')
