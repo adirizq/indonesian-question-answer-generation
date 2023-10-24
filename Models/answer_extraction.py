@@ -37,6 +37,10 @@ class BartAnswerExtraction(pl.LightningModule):
         }
 
     
+    def save_pretrained(self, save_path):
+        self.model.save_pretrained(save_path)
+        
+    
     def decode(self, text):
         decoded = self.tokenizer.decode(text).replace('<pad>', '').replace('<s>', '').replace('</s>', '')
         decoded = decoded.split('<hl>')[1] if '<hl>' in decoded else decoded
