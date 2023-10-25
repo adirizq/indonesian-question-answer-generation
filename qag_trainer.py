@@ -31,7 +31,7 @@ def initialize_pretrained_tokenizer(name):
 
 
 def initialize_pretrained_model(name, tokenizer_len, max_length):
-    model = AutoModelForSeq2SeqLM(name)
+    model = AutoModelForSeq2SeqLM.from_pretrained(name)
     model.resize_token_embeddings(tokenizer_len)
     model.config.max_length = max_length
     model.config.early_stopping = True
