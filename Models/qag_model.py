@@ -76,7 +76,7 @@ class QAGModel(pl.LightningModule):
 
         if self.lr_scheduler:
             scheduler = StepLR(optimizer, step_size=1, gamma=0.9)
-            return optimizer, scheduler
+            return {"optimizer": optimizer, "lr_scheduler": scheduler}
 
         return optimizer
     
