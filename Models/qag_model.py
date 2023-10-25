@@ -8,21 +8,21 @@ from textwrap import dedent
 from torch.nn import functional as F
 from indobenchmark import IndoNLGTokenizer
 from transformers import BartForConditionalGeneration
+from torch.optim.lr_scheduler import StepLR
 
 
 class QAGModel(pl.LightningModule):
     
-    def __init__(self, tokenizer, input_type, output_type, model_task, learning_rate=1e-5, max_length=512) -> None:
+    def __init__(self, model, tokenizer, lr_scheduler, input_type, output_type, model_task, learning_rate=1e-5) -> None:
         super(QAGModel, self).__init__()
 
+        self.model = model
         self.tokenizer = tokenizer
+        self.lr_scheduler = lr_scheduler
         self.input_type = input_type
         self.output_type = output_type
         self.model_task = model_task
         self.lr = learning_rate
-        self.model = BartForConditionalGeneration.from_pretrained('indobenchmark/indobart-v2')
-        self.model.resize_token_embeddings(len(self.tokenizer) + 1)
-        self.model.config.max_length = max_length
 
         self.bleu = evaluate.load('bleu')
         self.meteor = evaluate.load('meteor')
@@ -72,7 +72,12 @@ class QAGModel(pl.LightningModule):
     
 
     def configure_optimizers(self):
-        optimizer = torch.optim.Adam(self.parameters(), lr=self.lr)
+        optimizer = torch.optim.Adam(self.parameters(), lr=self.lr,  betas=(0.9, 0.999), eps=1e-08)
+
+        if self.lr_scheduler:
+            scheduler = StepLR(optimizer, step_size=1, gamma=0.9)
+            return optimizer, scheduler
+
         return optimizer
     
 
@@ -163,4 +168,14 @@ class QAGModel(pl.LightningModule):
         for d_pred, d_label in zip(self.test_step_outputs['outputs'], processed_labels):
             print(f'Predictions:\n{d_pred}')
             print(f'Labels:\n{d_label}\n') 
+        
+
+        self.log_dict({'test_exact_match': score_exact_match,
+                       'test_bleu': score_bleu,
+                       'test_meteor': score_meteor,
+                       'test_rouge1': score_rouge1,
+                       'test_rouge2': score_rouge2,
+                       'test_rougeL': score_rougeL,
+                       'test_rougeLsum': score_rougeLsum,
+                       }, on_epoch=True)
 

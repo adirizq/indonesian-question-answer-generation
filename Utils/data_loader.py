@@ -7,8 +7,6 @@ import multiprocessing
 import pytorch_lightning as pl
 
 from tqdm import tqdm
-from transformers import BertTokenizer
-from indobenchmark import IndoNLGTokenizer
 from torch.utils.data import TensorDataset, DataLoader
 
 
@@ -16,11 +14,11 @@ class AnswerExtractionDataModule(pl.LightningDataModule):
 
     def __init__(self, 
                  dataset_name, 
+                 tokenizer,
                  input_type,
                  output_type,
-                 pre_trained_model_name='indobenchmark/indobart-v2', 
                  max_length=512, 
-                 batch_size=10, 
+                 batch_size=8, 
                  recreate=False,
                  test=False,
                  ) -> None:
@@ -29,10 +27,10 @@ class AnswerExtractionDataModule(pl.LightningDataModule):
 
         self.seed = 42
         self.dataset_name = dataset_name
+        self.tokenizer = tokenizer
         self.input_type = input_type
         self.output_type = output_type
-        self.pre_trained_model_name = pre_trained_model_name
-        self.max_length = max_length
+        self.max_length = 128 if test else max_length
         self.batch_size = batch_size
         self.recreate = recreate
         self.test = test
@@ -44,17 +42,6 @@ class AnswerExtractionDataModule(pl.LightningDataModule):
         self.train_tensor_dataset_path = f"Datasets/Tensor/{dataset_name}_{input_type}_to_{output_type}/train.pt"
         self.valid_tensor_dataset_path = f"Datasets/Tensor/{dataset_name}_{input_type}_to_{output_type}/dev.pt"
         self.test_tensor_dataset_path = f"Datasets/Tensor/{dataset_name}_{input_type}_to_{output_type}/test.pt"
-
-        self.tokenizer = IndoNLGTokenizer.from_pretrained(self.pre_trained_model_name, additional_special_tokens=['<hl>', '<mask>'])
-        
-        # Must add model.resize_token_embeddings(len(tokenizer)) after adding new special tokens
-
-        if test:
-            self.max_length=128
-    
-
-    def get_tokenizer(self):
-        return self.tokenizer
 
 
     def load_data(self):
