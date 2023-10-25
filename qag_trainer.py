@@ -131,7 +131,7 @@ if __name__ == "__main__":
                                              )
     
     model = QAGModel(model=pretrained_model,
-                     tokenizer=data_module.get_tokenizer(), 
+                     tokenizer=tokenizer, 
                      lr_scheduler=model_inf[pretrained_model_type]['lr_scheduler'],
                      learning_rate=learning_rate,
                      input_type=input_type,
