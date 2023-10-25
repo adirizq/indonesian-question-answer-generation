@@ -47,17 +47,17 @@ class AnswerExtractionDataModule(pl.LightningDataModule):
     def load_data(self):
         if os.path.exists(self.train_tensor_dataset_path) and os.path.exists(self.valid_tensor_dataset_path) and os.path.exists(self.test_tensor_dataset_path) and not self.recreate:
             
-            print('\n[ Loading Dataset ]')
+            print('\n[ Loading Dataset ]\n')
             train_data = torch.load(self.train_tensor_dataset_path)
             valid_data = torch.load(self.valid_tensor_dataset_path)
             test_data = torch.load(self.test_tensor_dataset_path)
-            print('[ Load Completed ]')
+            print('\n[ Load Completed ]\n')
 
             return train_data, valid_data, test_data
         
         else:
 
-            print('\n[ Processing Dataset ]')
+            print('\n[ Processing Dataset ]\n')
             
             data_csv = {
                 'train': pd.read_csv(self.train_dataset_path),
@@ -111,7 +111,7 @@ class AnswerExtractionDataModule(pl.LightningDataModule):
                 tokenized_data[key] = TensorDataset(torch.tensor(input_ids), torch.tensor(attention_mask), torch.tensor(target_ids))
                 torch.save(tokenized_data[key], f'{tensordataset_save_dir}/{key}.pt')
 
-            print('[ Process Completed ]')
+            print('\n[ Process Completed ]\n')
             
             return tokenized_data['train'], tokenized_data['dev'], tokenized_data['test']
 
