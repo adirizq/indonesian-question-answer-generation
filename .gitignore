@@ -1,4 +1,6 @@
 /Datasets
 playground.py
 __pycache__/
-csv_logs/
+Pretrained/
+CSV Logs/
+Checkpoints/

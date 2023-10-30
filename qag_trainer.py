@@ -146,7 +146,7 @@ if __name__ == "__main__":
     Path(f'./Checkpoints/{model_task}').mkdir(parents=True, exist_ok=True)
 
     csv_logger = CSVLogger(f'CSV Logs', name=f'{model_task}/{pretrained_model_type}_{dataset}_{input_type}_to_{output_type}')
-    checkpoint_callback = ModelCheckpoint(dirpath=f'./Checkpoints/{model_task}/{pretrained_model_type}_{dataset}_{input_type}_to_{output_type}', monitor='val_loss', mode='min')
+    checkpoint_callback = ModelCheckpoint(dirpath=f'./Checkpoints/{model_task}/{pretrained_model_type}_{dataset}_{input_type}_to_{output_type}', filename='{epoch}-{val_loss:.2f}', monitor='val_loss', mode='min')
     early_stop_callback = EarlyStopping(monitor='val_loss', min_delta=0.000, check_on_train_epoch_end=1, patience=5, mode='min')
     tqdm_progress_bar = TQDMProgressBar()
 
@@ -165,12 +165,3 @@ if __name__ == "__main__":
 
     trainer.fit(model, datamodule=data_module)
     trainer.test(datamodule=data_module, ckpt_path='best')
-
-
-    print('\n[ Saving Trained Model ]\n')
-
-    Path(f'./Pretrained/{model_task}/{pretrained_model_type}_{dataset}_{input_type}_to_{output_type}/hf').mkdir(parents=True, exist_ok=True)
-    Path(f'./Pretrained/{model_task}/{pretrained_model_type}_{dataset}_{input_type}_to_{output_type}/pt').mkdir(parents=True, exist_ok=True)
-
-    model.save_pretrained(f'Pretrained/{model_task}/{pretrained_model_type}_{dataset}_{input_type}_to_{output_type}/hf')
-    torch.save(model.state_dict(), f'Pretrained/{model_task}/{pretrained_model_type}_{dataset}_{input_type}_to_{output_type}/pt/pretrained.pth')
