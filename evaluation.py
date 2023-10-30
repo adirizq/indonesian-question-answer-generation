@@ -8,6 +8,7 @@ import pandas as pd
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 from indobenchmark import IndoNLGTokenizer
 from textwrap import dedent
+from tqdm import tqdm
 
 from Models.qag_model import QAGModel
 
@@ -122,22 +123,23 @@ if __name__ == "__main__":
                 -------------------------------------------------------------------------
                 '''))
 
-                ae_model = AutoModelForSeq2SeqLM.from_pretrained(ae['model_path'])
-                qg_model = AutoModelForSeq2SeqLM.from_pretrained(qg['model_path'])
+                ae_model = AutoModelForSeq2SeqLM.from_pretrained(ae['model_path']).cuda()
+                qg_model = AutoModelForSeq2SeqLM.from_pretrained(qg['model_path']).cuda()
 
                 ae_tokenizer = initialize_pretrained_tokenizer(model_inf[ae['model']]['tokenizer'])
                 qg_tokenizer = initialize_pretrained_tokenizer(model_inf[qg['model']]['tokenizer'])
 
                 predicted = []
 
-                for index, data in evaluation_data.iterrows():
+                for index, data in tqdm(evaluation_data.iterrows(), total=evaluation_data.shape[0]):
                     ae_input_ids = encode(ae_tokenizer, data[ae['input_type']], ae_model.config.max_length)
-                    ae_pred = decode_clean(ae_model.generate(torch.tensor([ae_input_ids]).cuda()))
+                    ae_pred = ae_model.generate(torch.tensor([ae_input_ids]).cuda())[0]
+                    ae_pred_clean = decode_clean(ae_tokenizer, ae_pred)
 
                     qg_input_ids = encode(qg_tokenizer, ae_tokenizer.decode(ae_pred).strip(), qg_model.config.max_length)
-                    qg_pred = decode_clean(qg_model.generate(torch.tensor([qg_input_ids]).cuda()))
+                    qg_pred = decode_clean(qg_tokenizer, qg_model.generate(torch.tensor([qg_input_ids]).cuda())[0])
 
-                    predicted.append(f'question: {qg_pred} <sep> answer: {ae_pred}')
+                    predicted.append(f'question: {qg_pred} <sep> answer: {ae_pred_clean}')
                 
                 score_exact_match = exact_match_evaluation(predictions=predicted, references=evaluation_data['labels'].to_list())
                 score_bleu = bleu.compute(predictions=predicted, references=evaluation_data['labels'].to_list())["bleu"]
