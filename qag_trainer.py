@@ -165,3 +165,11 @@ if __name__ == "__main__":
 
     trainer.fit(model, datamodule=data_module)
     trainer.test(datamodule=data_module, ckpt_path='best')
+
+
+    print('\n[ Save Trained Model & Tokenizer ]\n')
+
+    Path(f'./Checkpoints/{model_task}/{pretrained_model_type}_{dataset}_{input_type}_to_{output_type}/hf').mkdir(parents=True, exist_ok=True)
+    Path(f'./Checkpoints/{model_task}/{pretrained_model_type}_{dataset}_{input_type}_to_{output_type}/tokenizer').mkdir(parents=True, exist_ok=True)
+    model.save_pretrained(f'./Checkpoints/{model_task}/{pretrained_model_type}_{dataset}_{input_type}_to_{output_type}/hf')
+    tokenizer.save_pretrained(f'./Checkpoints/{model_task}/{pretrained_model_type}_{dataset}_{input_type}_to_{output_type}/tokenizer')

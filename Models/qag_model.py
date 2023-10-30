@@ -16,7 +16,7 @@ class QAGModel(pl.LightningModule):
     def __init__(self, model, tokenizer, lr_scheduler, input_type, output_type, model_task, learning_rate=1e-5) -> None:
         super(QAGModel, self).__init__()
 
-        self.save_hyperparameters()
+        self.save_hyperparameters(ignore=['model', 'tokenizer'])
 
         self.model = model
         self.tokenizer = tokenizer
