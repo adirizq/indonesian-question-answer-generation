@@ -139,7 +139,7 @@ if __name__ == "__main__":
                     qg_input_ids = encode(qg_tokenizer, ae_tokenizer.decode(ae_pred).strip(), qg_model.config.max_length)
                     qg_pred = decode_clean(qg_tokenizer, qg_model.generate(torch.tensor([qg_input_ids]).cuda())[0])
 
-                    predicted.append(f'question: {qg_pred} <sep> answer: {ae_pred_clean}')
+                    predicted.append(f'question: {qg_pred}, answer: {ae_pred_clean}')
                 
                 score_exact_match = exact_match_evaluation(predictions=predicted, references=evaluation_data['labels'].to_list())
                 score_bleu = bleu.compute(predictions=predicted, references=evaluation_data['labels'].to_list())["bleu"]
