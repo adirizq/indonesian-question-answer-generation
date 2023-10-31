@@ -170,5 +170,5 @@ if __name__ == "__main__":
 
     print('\n[ Save Trained Model ]\n')
 
-    Path(f'./Checkpoints/{model_task}/{pretrained_model_type}_{dataset}_{input_type}_to_{output_type}/hf').mkdir(parents=True, exist_ok=True)
-    model.save_pretrained(f'./Checkpoints/{model_task}/{pretrained_model_type}_{dataset}_{input_type}_to_{output_type}/hf')
+    Path(f'./Trained Model/{model_task}/{pretrained_model_type}_{dataset}_{input_type}_to_{output_type}/hf').mkdir(parents=True, exist_ok=True)
+    model.save_pretrained(f'./Trained Model/{model_task}/{pretrained_model_type}_{dataset}_{input_type}_to_{output_type}')

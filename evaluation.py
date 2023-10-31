@@ -89,7 +89,7 @@ if __name__ == "__main__":
             'qg': []
         }
         
-        root = 'Checkpoints'
+        root = 'Trained Model'
 
         for task_type in os.listdir(root):
             if task_type in ['ae', 'qg']:
@@ -100,7 +100,7 @@ if __name__ == "__main__":
                     dataset = model_info[1]
                     input_type = '_'.join(model_info[2:(model_info.index('to'))])
                     output_type = '_'.join(model_info[(model_info.index('to'))+1:])
-                    model_path = os.path.join(os.path.join(path, checkpoint), 'hf')
+                    model_path = os.path.join(path, checkpoint)
                     
                     models[task_type].append({'model': model, 'dataset': dataset, 'input_type': input_type, 'output_type': output_type, 'model_path': model_path})
 
