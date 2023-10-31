@@ -34,6 +34,9 @@ class AnswerExtractionDataModule(pl.LightningDataModule):
         self.batch_size = batch_size
         self.recreate = recreate
         self.test = test
+
+        self.bos_token = tokenizer.bos_token if tokenizer.bos_token != None else ""
+        self.eos_token = tokenizer.eos_token if tokenizer.eos_token != None else ""
         
         self.train_dataset_path = f"Datasets/Processed/{dataset_name}/prepared_train.csv"
         self.valid_dataset_path = f"Datasets/Processed/{dataset_name}/prepared_dev.csv"
@@ -87,13 +90,13 @@ class AnswerExtractionDataModule(pl.LightningDataModule):
                     input_text = locals()[self.input_type]
                     output_text = locals()[self.output_type]
 
-                    encoded_input = self.tokenizer(f'<s>{input_text}</s>', 
+                    encoded_input = self.tokenizer(f'{self.bos_token}{input_text}{self.eos_token}', 
                                                                   add_special_tokens=True, 
                                                                   max_length=self.max_length,
                                                                   padding="max_length",
                                                                   truncation=True)
                     
-                    encoded_output =  self.tokenizer(f'<s>{output_text}</s>',
+                    encoded_output =  self.tokenizer(f'{self.bos_token}{output_text}{self.eos_token}',
                                                      add_special_tokens=True, 
                                                      max_length=self.max_length,
                                                      padding="max_length",

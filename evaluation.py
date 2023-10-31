@@ -78,7 +78,8 @@ if __name__ == "__main__":
     evaluation_data['labels'] = evaluation_data['context'].apply(lambda x: labels_dict[x])
 
     model_inf = {
-        'IndoBART': {'type': 'BART', 'tokenizer': 'indobenchmark/indobart-v2'}
+        'IndoBART': {'type': 'BART', 'tokenizer': 'indobenchmark/indobart-v2'},
+        'Flan-T5': {'type': 'Flan-T5', 'tokenizer': 'google/flan-t5-base'}
     }
 
     if config['type'] == 'Pipeline':
