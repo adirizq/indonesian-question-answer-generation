@@ -53,7 +53,7 @@ class QAGModel(pl.LightningModule):
 
     
     def decode(self, text):
-        decoded = self.tokenizer.decode(text).replace('<pad>', '').replace('<s>', '').replace('</s>', '')
+        decoded = self.tokenizer.decode(text).replace('<pad>', '').replace('<s>', '').replace('</s>', '').replace('<unk>', '')
         decoded = decoded.split('<hl>')[1] if '<hl>' in decoded else decoded
         return decoded.strip()
     

@@ -47,7 +47,7 @@ def encode(tokenizer, text, max_length):
 
 
 def decode_clean(tokenizer, text):
-        decoded = tokenizer.decode(text).replace('<pad>', '').replace('<s>', '').replace('</s>', '')
+        decoded = tokenizer.decode(text).replace('<pad>', '').replace('<s>', '').replace('</s>', '').replace('<unk>', '')
         decoded = decoded.split('<hl>')[1] if '<hl>' in decoded else decoded
         return decoded.strip()
 
