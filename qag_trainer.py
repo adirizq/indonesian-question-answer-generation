@@ -77,8 +77,8 @@ if __name__ == "__main__":
     }
 
     model_inf = {
-        'IndoBART': {'type': 'BART', 'tokenizer': 'google/flan-t5-small-base', 'pre_trained': 'google/flan-t5-small-base', 'lr_scheduler': True},
-        'Flan-T5': {'type': 'Flan-T5', 'tokenizer': 'google/flan-t5-small-base', 'pre_trained': 'google/flan-t5-small-base', 'lr_scheduler': False}
+        'IndoBART': {'type': 'BART', 'tokenizer': 'google/flan-t5-small-base', 'pre_trained': 'google/flan-t5-base', 'lr_scheduler': True},
+        'Flan-T5': {'type': 'Flan-T5', 'tokenizer': 'google/flan-t5-small-base', 'pre_trained': 'google/flan-t5-base', 'lr_scheduler': False}
     }
 
     if is_test:
