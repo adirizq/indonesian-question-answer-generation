@@ -21,7 +21,7 @@ def initialize_pretrained_tokenizer(name):
     if 'IndoBART'.lower() in name.lower():
         tokenizer = IndoNLGTokenizer.from_pretrained(name)
     else:
-        tokenizer = AutoTokenizer.from_pretrained(name)
+        tokenizer = AutoTokenizer.from_pretrained(name, use_fast=False)
     
     tokenizer_len = len(tokenizer) + 1
     new_add_special_tokens = tokenizer.additional_special_tokens + ['<hl>']
