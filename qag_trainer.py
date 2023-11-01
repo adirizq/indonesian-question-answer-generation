@@ -54,6 +54,7 @@ if __name__ == "__main__":
     parser.add_argument('-i', '--input_type', choices=['context_key_sentence', 'context', 'context_answer'], required=True, help='Input type for training')
     parser.add_argument('-o', '--output_type', choices=['context_answer', 'answer', 'question'], required=True, help='Output type training')
     parser.add_argument('-e', '--max_epochs', type=int, default=50, help='Max epochs for training')
+    parser.add_argument('-b', '--batch_size', type=int, help='Batch size for training')
 
     args = parser.parse_args()
     config = vars(args)
@@ -67,9 +68,15 @@ if __name__ == "__main__":
     output_type = config['output_type']
     pretrained_model_type = config['pretrained_model']
     dataset = config['dataset']
-    batch_size = 8
     learning_rate = 1e-5
     max_length = 128 if is_test else 512
+
+    if config['batch_size']:
+        batch_size = config['batch_size']
+    elif config['pretrained_model'] == 'IndoBART':
+        batch_size = 8
+    elif config['pretrained_model'] == 'Flan-T5':
+        batch_size = 6
 
     model_task_inf = {
         'ae': 'Answer Extraction',
