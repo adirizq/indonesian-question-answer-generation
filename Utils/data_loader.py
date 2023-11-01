@@ -15,6 +15,7 @@ class AnswerExtractionDataModule(pl.LightningDataModule):
     def __init__(self, 
                  dataset_name, 
                  tokenizer,
+                 model,
                  input_type,
                  output_type,
                  max_length=512, 
@@ -28,15 +29,13 @@ class AnswerExtractionDataModule(pl.LightningDataModule):
         self.seed = 42
         self.dataset_name = dataset_name
         self.tokenizer = tokenizer
+        self.model = model
         self.input_type = input_type
         self.output_type = output_type
         self.max_length = 128 if test else max_length
         self.batch_size = batch_size
         self.recreate = recreate
         self.test = test
-
-        self.bos_token = tokenizer.bos_token if tokenizer.bos_token != None else ""
-        self.eos_token = tokenizer.eos_token if tokenizer.eos_token != None else ""
         
         self.train_dataset_path = f"Datasets/Processed/{dataset_name}/prepared_train.csv"
         self.valid_dataset_path = f"Datasets/Processed/{dataset_name}/prepared_dev.csv"
@@ -87,16 +86,20 @@ class AnswerExtractionDataModule(pl.LightningDataModule):
 
                 for (context, context_key_sentence, context_answer, question, answer) in tqdm(data.values.tolist(), desc=f'Tokenizing {key} data'):
 
-                    input_text = locals()[self.input_type]
-                    output_text = locals()[self.output_type]
+                    if self.model == 'IndoBART':
+                        input_text = f'{self.tokenizer.bos_token}{locals()[self.input_type]}{self.tokenizer.eos_token}'
+                        output_text = f'{locals()[self.output_type]}'
+                    elif self.model == 'Flan-T5':
+                        input_text = locals()[self.input_type]
+                        output_text = locals()[self.output_type]
 
-                    encoded_input = self.tokenizer(f'{self.bos_token}{input_text}{self.eos_token}', 
-                                                                  add_special_tokens=True, 
-                                                                  max_length=self.max_length,
-                                                                  padding="max_length",
-                                                                  truncation=True)
+                    encoded_input = self.tokenizer(input_text, 
+                                                   add_special_tokens=True, 
+                                                   max_length=self.max_length,
+                                                   padding="max_length",
+                                                   truncation=True)
                     
-                    encoded_output =  self.tokenizer(f'{self.bos_token}{output_text}{self.eos_token}',
+                    encoded_output =  self.tokenizer(output_text,
                                                      add_special_tokens=True, 
                                                      max_length=self.max_length,
                                                      padding="max_length",

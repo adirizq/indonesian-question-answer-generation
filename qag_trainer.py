@@ -129,8 +129,9 @@ if __name__ == "__main__":
     print('\n[ Initializing Data Module & Model ]\n')
 
     data_module = AnswerExtractionDataModule(dataset_name=dataset, 
-                                             input_type=input_type,
                                              tokenizer=tokenizer, 
+                                             model=pretrained_model_type,
+                                             input_type=input_type,
                                              output_type=output_type,
                                              batch_size=batch_size,
                                              max_length=max_length,
