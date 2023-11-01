@@ -76,7 +76,7 @@ if __name__ == "__main__":
     elif config['pretrained_model'] == 'IndoBART':
         batch_size = 8
     elif config['pretrained_model'] == 'Flan-T5':
-        batch_size = 6
+        batch_size = 4
 
     model_task_inf = {
         'ae': 'Answer Extraction',
