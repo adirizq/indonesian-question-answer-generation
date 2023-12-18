@@ -43,11 +43,11 @@ def prepare_data(data_path, save_path):
                 
                 if 'is_impossible' in qas:
                     if not qas['is_impossible']:
-                        if int(qas['indonesian_answers'][0]['answer_start']) != -1:
+                        if int(qas['indonesian_answers'][0]['answer_start']) != -1 and len(str(qas['indonesian_answers'][0]['text'])) > 0:
                             qas_dict.update(qas['indonesian_answers'][0])
                             paragraph_dict['qas'].append(qas_dict)
                 else:
-                    if int(qas['indonesian_answers'][0]['answer_start']) != -1:
+                    if int(qas['indonesian_answers'][0]['answer_start']) != -1 and len(str(qas['indonesian_answers'][0]['text'])) > 0:
                         qas_dict.update(qas['indonesian_answers'][0])
                         paragraph_dict['qas'].append(qas_dict)
 
