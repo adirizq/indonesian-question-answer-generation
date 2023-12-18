@@ -1,46 +1,79 @@
 import os
 import sys
+import json
 import stanza
+import shutil
+import zipfile
 import pandas as pd
 
 from tqdm import tqdm
 
+# Data preparation function
+# Read json file
+# Modify: remove qas without answer, refactor json structure
+# Save modified json
+def prepare_data(data_path, save_path):
 
-def data_preparation(data_path, save_path):
-    data = pd.read_csv(data_path)
+    modified_data = []
 
-    new_data = []
-
-    for index, row in tqdm(data.iterrows(), total=data.shape[0]):
-        context = row['context']
-        answer_start = row['answer_start']
-        answer_text = row['answer_text']
-
-        context_answer = f"{context[:answer_start]}<hl>{answer_text}<hl>{context[(answer_start + len(str(answer_text))):]}"
-        context_key_sentence = [sentence.text for sentence in nlp(context_answer).sentences]
-        context_key_sentence = " ".join([ f'<hl>{s.replace("<hl>", "")}<hl>' if "<hl>" in s else s for s in context_key_sentence])
-
-        new_data.append({'context': row['context'], 'context_key_sentence': context_key_sentence, 'context_answer': context_answer, 'question': row['question'], 'answer': row['answer_text']})
+    with open(data_path, 'r') as f:
+        data = json.load(f)
+    
+    for p_key, p_value in tqdm(data['paragraphs'].items(), desc=f'Preparing {data_path}'):
         
-    new_data_df = pd.DataFrame.from_dict(new_data)
-    new_data_df.to_csv(save_path, index=False)
+        article_dict = {
+            'title': '',
+            'paragraphs': [],
+        }
 
+        article_dict['title'] = data['title'][p_key]
+
+        for paragraph in p_value:
+
+            paragraph_dict = {
+                'context': '',
+                'qas': []
+            }
+
+            paragraph_dict['context'] = paragraph['context']
+
+            for qas in paragraph['qas']:
+
+                qas_dict = {'question': qas['question']}
+                
+                if 'is_impossible' in qas:
+                    if not qas['is_impossible']:
+                        if int(qas['indonesian_answers'][0]['answer_start']) != -1:
+                            qas_dict.update(qas['indonesian_answers'][0])
+                            paragraph_dict['qas'].append(qas_dict)
+                else:
+                    if int(qas['indonesian_answers'][0]['answer_start']) != -1:
+                        qas_dict.update(qas['indonesian_answers'][0])
+                        paragraph_dict['qas'].append(qas_dict)
+
+            if len(paragraph_dict['qas']) > 0:
+                article_dict['paragraphs'].append(paragraph_dict)
+
+        modified_data.append(article_dict)
+    
+    os.makedirs(os.path.dirname(save_path), exist_ok=True)
+
+    with open(save_path, "w") as outfile:
+        json.dump(modified_data, outfile)
+
+    
 
 if __name__ == "__main__":
 
-    stanza.download('id')
-    nlp = stanza.Pipeline('id', processors='tokenize')
+    # Extract qag_dataset.zip
+    with zipfile.ZipFile('Datasets/qag_dataset.zip', 'r') as zip_ref:
+        zip_ref.extractall('Datasets/Temp')
 
-    save_paths = ['Datasets/Processed/TyDiQA', 'Datasets/Processed/SQuAD']
-
-    for path in save_paths:
-        if not os.path.exists(path):
-            os.makedirs(path)
-
-    data_preparation('Datasets/Csv/SQuAD/train.csv', 'Datasets/Processed/SQuAD/prepared_train.csv')
-    data_preparation('Datasets/Csv/SQuAD/dev.csv', 'Datasets/Processed/SQuAD/prepared_dev.csv')
-    data_preparation('Datasets/Csv/SQuAD/test.csv', 'Datasets/Processed/SQuAD/prepared_test.csv')
-
-    data_preparation('Datasets/Csv/TyDiQA/train.csv', 'Datasets/Processed/TyDiQA/prepared_train.csv')
-    data_preparation('Datasets/Csv/TyDiQA/dev.csv', 'Datasets/Processed/TyDiQA/prepared_dev.csv')
-    data_preparation('Datasets/Csv/TyDiQA/test.csv', 'Datasets/Processed/TyDiQA/prepared_test.csv')
+    # Prepare SQuAD2.0 and TyDiQA
+    prepare_data('Datasets/Temp/train-v2.0-translated_fixed_enhanced.json', 'Datasets/Raw/SQuAD2.0/train.json')
+    prepare_data('Datasets/Temp/dev-v2.0-translated_fixed_enhanced.json', 'Datasets/Raw/SQuAD2.0/dev.json')
+    prepare_data('Datasets/Temp/tydiqa-goldp-v1.1-train-indonesian_prepared_enhanced.json', 'Datasets/Raw/TyDiQA/train.json')
+    prepare_data('Datasets/Temp/tydiqa-goldp-v1.1-dev-indonesian_prepared_enhanced.json', 'Datasets/Raw/TyDiQA/dev.json')
+    
+    # Delete temp extracted data
+    shutil.rmtree('Datasets/Temp')
