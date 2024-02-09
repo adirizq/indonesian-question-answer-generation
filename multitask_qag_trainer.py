@@ -47,11 +47,20 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='Trainer Parser')
     parser.add_argument('-p', '--pretrained_model', choices=['IndoBART', 'Flan-T5'], required=True, help='Pretrained model for training')
+    parser.add_argument('-e', '--max_epochs', type=int, default=50, help='Max epochs for training')
+    parser.add_argument('-b', '--batch_size', type=int, help='Batch size for training')
 
     args = parser.parse_args()
     config = vars(args)
 
     pretrained_model_type = config['pretrained_model']
+    max_epochs = config['max_epochs']
+    if config['batch_size']:
+        batch_size = config['batch_size']
+    elif config['pretrained_model'] == 'IndoBART':
+        batch_size = 8
+    elif config['pretrained_model'] == 'Flan-T5':
+        batch_size = 4
 
     model_inf = {
         'IndoBART': {'type': 'BART', 'tokenizer': 'indobenchmark/indobart-v2', 'pre_trained': 'indobenchmark/indobart-v2', 'lr_scheduler': True},
@@ -66,7 +75,7 @@ if __name__ == '__main__':
     data_module = QAGMultiTaskDataModule(dataset_name=dataset, 
                                          tokenizer=tokenizer, 
                                          model=pretrained_model_type,
-                                         batch_size=8,
+                                         batch_size=batch_size,
                                          max_length=512,
                                          recreate=True,
                                          test=False)
@@ -89,7 +98,7 @@ if __name__ == '__main__':
         default_root_dir=f'./Checkpoints/QAGMultiTask/{pretrained_model_type}_{dataset}',
         callbacks=[checkpoint_callback, early_stop_callback, tqdm_progress_bar],
         logger=[csv_logger],
-        max_epochs=20,
+        max_epochs=max_epochs,
         log_every_n_steps=5,
         deterministic=True 
     )
