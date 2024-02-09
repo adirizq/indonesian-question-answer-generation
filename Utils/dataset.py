@@ -6,6 +6,21 @@ import pandas as pd
 from torch.utils.data import Dataset
 
 
+class QAGDataset(Dataset):
+
+    def __init__(self, context_input_ids, context_attention_mask, answer_input_ids, question_input_ids):
+        self.context_input_ids = context_input_ids
+        self.context_attention_mask = context_attention_mask
+        self.answer_input_ids = answer_input_ids
+        self.question_input_ids = question_input_ids
+    
+    def __getitem__(self, index):
+        return self.context_input_ids[index], self.context_attention_mask[index], self.answer_input_ids[index], self.question_input_ids[index]
+
+    def __len__(self):
+        return len(self.context_input_ids)
+
+
 class AnswerExtractionDataset(Dataset):
     
     def __init__(self, csv_path, save_path, tokenizer, max_length = 512, recreate = False):

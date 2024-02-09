@@ -8,3 +8,4 @@ torch
 tqdm
 transformers==4.28.0
 nltk==3.7
+py4j==0.10.9.7
