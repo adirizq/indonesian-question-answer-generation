@@ -89,7 +89,7 @@ if __name__ == '__main__':
         default_root_dir=f'./Checkpoints/QAGMultiTask/{pretrained_model_type}_{dataset}',
         callbacks=[checkpoint_callback, early_stop_callback, tqdm_progress_bar],
         logger=[csv_logger],
-        max_epochs=2,
+        max_epochs=20,
         log_every_n_steps=5,
         deterministic=True 
     )
