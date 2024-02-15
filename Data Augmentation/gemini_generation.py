@@ -68,11 +68,11 @@ def generate_save_qa(file_name, gemini_creative, gemini_strict, prompts):
 
     # Generate question and answer
     response_qa = gemini_creative.generate_content(prompt_generate_qa)
-    generated_qa = response_qa.text.replace('```', '').replace('json', '')
+    generated_qa = response_qa.text
 
     # Verify question and answer
     try:
-      qas = json.loads(generated_qa)
+      qas = json.loads(generated_qa.replace('```', '').replace('json', ''))
 
       for qa in qas:
         if 'answer' in qa and 'question' in qa:
