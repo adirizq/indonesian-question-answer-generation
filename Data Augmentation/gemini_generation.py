@@ -16,7 +16,6 @@ def setup_gemini(temperature):
     "temperature": temperature,
     "top_p": 1,
     "top_k": 1,
-    "max_output_tokens": 2048,
   }
 
   safety_settings = [
@@ -60,7 +59,10 @@ def generate_save_qa(file_name, gemini_creative, gemini_strict, prompts):
 
     # Generate story
     response_story = gemini_creative.generate_content(prompt_generate_story)
-    generated_story = response_story.text
+    try:
+      generated_story = response_story.text
+    except:
+      continue
     qa_temp['context'] = generated_story
 
     # Create question and answer generation prompt
@@ -68,7 +70,10 @@ def generate_save_qa(file_name, gemini_creative, gemini_strict, prompts):
 
     # Generate question and answer
     response_qa = gemini_creative.generate_content(prompt_generate_qa)
-    generated_qa = response_qa.text
+    try:
+      generated_qa = response_qa.text
+    except:
+      continue
 
     # Verify question and answer
     try:
@@ -84,8 +89,11 @@ def generate_save_qa(file_name, gemini_creative, gemini_strict, prompts):
 
             response_verify_qa = gemini_strict.generate_content(prompt_verify_qa)
 
-            if 'true' in response_verify_qa.text.lower():
-              qa_temp['qa'].append(qa)
+            try:
+              if 'true' in response_verify_qa.text.lower():
+                qa_temp['qa'].append(qa)
+            except:
+              continue
     except:
       pass
 
