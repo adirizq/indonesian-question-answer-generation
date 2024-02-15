@@ -3,4 +3,5 @@ __pycache__/
 Pretrained/
 CSV Logs/
 Checkpoints/
-Datasets/Tensor
+Datasets/*
+!Datasets/qag_dataset.zip
