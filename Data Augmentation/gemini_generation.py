@@ -58,8 +58,8 @@ def generate_save_qa(file_name, gemini_creative, gemini_strict, prompts):
     prompt_generate_story = prompt_generate_story.replace("{WORD_LENGTH}", str(random.sample(prompts.STORY_WORD_LENGTH, 1)[0]))
 
     # Generate story
-    response_story = gemini_creative.generate_content(prompt_generate_story)
     try:
+      response_story = gemini_creative.generate_content(prompt_generate_story)
       generated_story = response_story.text
     except:
       continue
@@ -69,8 +69,8 @@ def generate_save_qa(file_name, gemini_creative, gemini_strict, prompts):
     prompt_generate_qa = prompts.QUESTION_ANSWER_PROMPT.replace("{STORY}", generated_story)
 
     # Generate question and answer
-    response_qa = gemini_creative.generate_content(prompt_generate_qa)
     try:
+      response_qa = gemini_creative.generate_content(prompt_generate_qa)
       generated_qa = response_qa.text
     except:
       continue
@@ -87,9 +87,8 @@ def generate_save_qa(file_name, gemini_creative, gemini_strict, prompts):
             prompt_verify_qa = prompt_verify_qa.replace("{QUESTION}", qa['question'])
             prompt_verify_qa = prompt_verify_qa.replace("{ANSWER}", qa['answer'])
 
-            response_verify_qa = gemini_strict.generate_content(prompt_verify_qa)
-
             try:
+              response_verify_qa = gemini_strict.generate_content(prompt_verify_qa)
               if 'true' in response_verify_qa.text.lower():
                 qa_temp['qa'].append(qa)
             except:
