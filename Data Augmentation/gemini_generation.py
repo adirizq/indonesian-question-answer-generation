@@ -46,7 +46,7 @@ def setup_gemini(temperature):
 def generate_save_qa(file_name, gemini_creative, gemini_strict, prompts):
   generated_qas = []
   total_generated_qas = 0
-  target = 5000
+  target = 20000
 
   for i in range(target):
     st = time.time()
