@@ -3,5 +3,6 @@ __pycache__/
 Pretrained/
 CSV Logs/
 Checkpoints/
-Datasets/*
+Datasets/*.csv
 !Datasets/qag_dataset.zip
+Old/
