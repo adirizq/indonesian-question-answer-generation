@@ -156,7 +156,7 @@ class AugmentedDataFormatter:
 
         # Highlight answer adn context in context
         df['answer_highlighted_context'] = df.progress_apply(highlighter.highlight_answer, axis=1)
-        df['context_highlighted_sentence'] = df.progress_apply(highlighter.highlight_sentence, axis=1)
+        df['sentence_highlighted_context'] = df.progress_apply(highlighter.highlight_sentence, axis=1)
         
         # Save data in CSV format
         df.to_csv(output_highlighted_csv_path, index=False)
@@ -209,3 +209,16 @@ class AugmentedDataFormatter:
         print(f"[WARNING] Contexts in train that are also in val or test: {len(train_in_val_or_test)}")
         print(f"[WARNING] Contexts in val that are also in train or test: {len(val_in_train_or_test)}")
         print(f"[WARNING] Contexts in test that are also in train or val: {len(test_in_train_or_val)}")
+
+
+class TokenizerHelper:
+    def __init__(self, tokenizer, max_length):
+        self.tokenizer = tokenizer
+        self.max_length = max_length
+
+    def indobart_tokenize(self, text):
+        text = f'{text}{self.tokenizer.eos_token}'
+        return self.tokenizer(text, max_length=self.max_length, add_special_tokens=True, truncation=True, padding='max_length')
+
+    def flan_t5_tokenize(self, text):
+        return self.tokenizer(text, max_length=self.max_length, add_special_tokens=True, truncation=True, padding='max_length')
