@@ -10,6 +10,13 @@ from py4j.java_gateway import JavaGateway
 from tqdm import tqdm
 
 
+def remove_quotes(context):
+    context = context.strip()
+    if (context.startswith('"') and context.endswith('"')) or (context.startswith("'") and context.endswith("'")):
+        return context[1:-1]
+    return context
+
+
 def flatten_json(json_data):
     flat_data = []
     for item in json_data:
@@ -73,10 +80,10 @@ if __name__ == "__main__":
     # Remove duplicates
     df = df.drop_duplicates()
 
-    # Remove leading and trailing whitespaces
-    df.context = df.context.str.strip()
-    df.question = df.question.str.strip()
-    df.answer = df.answer.str.strip()
+    # Remove leading and trailing whitespaces and quotes
+    df.context = df.context.apply(remove_quotes)
+    df.question = df.question.apply(remove_quotes)
+    df.answer = df.answer.apply(remove_quotes)
 
     # Find answer position
     df['answer_start'] = df.progress_apply(lambda x: find_answer_index(x, vectorizer), axis=1)
