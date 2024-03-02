@@ -4,5 +4,6 @@ Pretrained/
 CSV Logs/
 Checkpoints/
 Datasets/**/*.csv
+Datasets/**/*.pt
 !Datasets/qag_dataset.zip
 Old/

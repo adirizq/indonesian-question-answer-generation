@@ -2,12 +2,17 @@ import os
 import re
 import sys
 import json
+import evaluate
 import pandas as pd
 
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.model_selection import train_test_split
+from indobenchmark import IndoNLGTokenizer
 from py4j.java_gateway import JavaGateway
+from transformers import AutoTokenizer
+from textwrap import dedent
+from enum import Enum
 from tqdm import tqdm
 
 
@@ -211,14 +216,125 @@ class AugmentedDataFormatter:
         print(f"[WARNING] Contexts in test that are also in train or val: {len(test_in_train_or_val)}")
 
 
-class TokenizerHelper:
-    def __init__(self, tokenizer, max_length):
-        self.tokenizer = tokenizer
+class Tokenizer:
+    def __init__(self, model_type, max_length):
+        self.model_type = model_type
         self.max_length = max_length
 
-    def indobart_tokenize(self, text):
-        text = f'{text}{self.tokenizer.eos_token}'
-        return self.tokenizer(text, max_length=self.max_length, add_special_tokens=True, truncation=True, padding='max_length')
+        if  self.model_type == ModelType.INDOBART:
+            self.tokenizer = IndoNLGTokenizer.from_pretrained('indobenchmark/indobart-v2')
+        
+        if  self.model_type == ModelType.FLAN_T5:
+            self.tokenizer = AutoTokenizer.from_pretrained('google/flan-t5-small', use_fast=False)
+        
+        self.original_special_tokens = self.tokenizer.all_special_tokens
 
-    def flan_t5_tokenize(self, text):
-        return self.tokenizer(text, max_length=self.max_length, add_special_tokens=True, truncation=True, padding='max_length')
+        new_add_special_tokens = self.tokenizer.additional_special_tokens + ['<hl>']
+        self.tokenizer.add_special_tokens({'additional_special_tokens': new_add_special_tokens})
+
+
+    def tokenizer_len(self):
+        return len(self.tokenizer) + 1
+
+
+    def tokenize(self, text_list):
+        if self.model_type == ModelType.INDOBART:
+            text_list = [f'{text}{self.tokenizer.eos_token}' for text in text_list]
+        
+        return self.tokenizer(text_list, max_length=self.max_length, add_special_tokens=True, truncation=True, padding='max_length')
+    
+
+    def decode(self, input_ids):
+        decoded = self.tokenizer.decode(input_ids)
+
+        for token in self.original_special_tokens:
+            decoded = decoded.replace(token, '')
+
+        return decoded
+
+
+    def decode_for_answer_or_question(self, input_ids):
+        decoded = self.decode(input_ids)
+
+        return decoded.split('<hl>')[1] if '<hl>' in decoded else decoded
+    
+
+class Evaluator:
+    def __init__(self):
+        self.bleu = evaluate.load('bleu')
+        self.meteor = evaluate.load('meteor')
+        self.rouge = evaluate.load('rouge')
+    
+
+    def exact_match_evaluation(self, predictions, references):
+        assert len(predictions) == len(references), "The number of predictions and references should be the same"
+
+        exact_matches = 0
+        for pred, refs in zip(predictions, references):
+            if pred in refs:
+                exact_matches += 1
+
+        return exact_matches / len(predictions)
+    
+
+    def bleu_score(self, predictions, references):
+        return self.bleu.compute(predictions=predictions, references=references)["bleu"]
+    
+
+    def meteor_score(self, predictions, references):
+        return self.meteor.compute(predictions=predictions, references=references)["meteor"]
+    
+
+    def rouge_score(self, predictions, references):
+        score = self.rouge.compute(predictions=predictions, references=references)
+        return score['rouge1'], score['rouge2'], score['rougeL'], score['rougeLsum']
+    
+
+    def evaluate_pipeline(self, task_type, test_step_outputs):
+        predictions = test_step_outputs['outputs']
+        references = [[label] for label in test_step_outputs['labels']]
+
+        score_exact_match = self.exact_match_evaluation(predictions=predictions, references=references)
+        score_bleu = self.bleu_score(predictions=predictions, references=references)
+        score_meteor = self.meteor_score(predictions=predictions, references=references)
+        score_rouge1, score_rouge2, score_rougeL, score_rougeLsum = self.rouge_score(predictions=predictions, references=references)
+
+        print(dedent(f'''
+        -----------------------------------------------
+                            {str(task_type.value).upper()} Test Result        
+        -----------------------------------------------
+        Name                | Value       
+        -----------------------------------------------
+        Exact Match         | {score_exact_match}
+        Bleu                | {score_bleu}
+        Meteor              | {score_meteor}
+        Rouge1              | {score_rouge1}
+        Rouge2              | {score_rouge2}
+        RougeL              | {score_rougeL}
+        RougeLsum           | {score_rougeLsum}
+        -----------------------------------------------
+        '''))
+
+        print(dedent(f'''
+        -----------------------------------------------
+                        {str(task_type.value).upper()} Prediction Result        
+        -----------------------------------------------
+        '''))
+
+        for d_pred, d_label in zip(predictions, references):
+            print(f'Predictions:\n{d_pred}')
+            print(f'Labels:\n{d_label}\n') 
+
+
+        return score_exact_match, score_bleu, score_meteor, score_rouge1, score_rouge2, score_rougeL, score_rougeLsum
+
+
+
+class ModelType(Enum):
+    INDOBART = 'IndoBART'
+    FLAN_T5 = 'Flan-T5'
+
+
+class PipeLineTaskType(Enum):
+    QUESTION_GENERATION = 'qg'
+    ANSWER_EXTRACTION = 'ae'
