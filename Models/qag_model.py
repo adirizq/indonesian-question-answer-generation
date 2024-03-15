@@ -247,13 +247,13 @@ class QAGMultiTaskModel(pl.LightningModule):
         
         score_exact_match, score_bleu, score_meteor, score_rouge1, score_rouge2, score_rougeL, score_rougeLsum = evaluator.evaluate(self.test_type, self.test_step_outputs)
 
-        self.log_dict({f"{self.task_type.value}_test_exact_match": score_exact_match,
-                       f"{self.task_type.value}_test_bleu": score_bleu,
-                       f"{self.task_type.value}_test_meteor": score_meteor,
-                       f"{self.task_type.value}_test_rouge1": score_rouge1,
-                       f"{self.task_type.value}_test_rouge2": score_rouge2,
-                       f"{self.task_type.value}_test_rougeL": score_rougeL,
-                       f"{self.task_type.value}_test_rougeLsum": score_rougeLsum
+        self.log_dict({f"{self.test_type.value}_test_exact_match": score_exact_match,
+                       f"{self.test_type.value}_test_bleu": score_bleu,
+                       f"{self.test_type.value}_test_meteor": score_meteor,
+                       f"{self.test_type.value}_test_rouge1": score_rouge1,
+                       f"{self.test_type.value}_test_rouge2": score_rouge2,
+                       f"{self.test_type.value}_test_rougeL": score_rougeL,
+                       f"{self.test_type.value}_test_rougeLsum": score_rougeLsum
                        }, on_epoch=True)
 
 
