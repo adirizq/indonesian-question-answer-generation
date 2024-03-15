@@ -89,7 +89,7 @@ class MultiTaskDataset(Dataset):
 
         df = pd.read_csv(self.csv_path)[['sentence_highlighted_context', 'answer_highlighted_context', 'question']]
         
-        
+
         if self.test_type is None:
             for index, row in df.iterrows():
                 # Answer Extraction
@@ -115,8 +115,8 @@ class MultiTaskDataset(Dataset):
                 data_dict['output'].append(row['question'])
 
 
-        encoded_x = self.tokenizer.tokenize(df['input'].tolist())
-        encoded_y = self.tokenizer.tokenize(df['output'].tolist())
+        encoded_x = self.tokenizer.tokenize(data_dict['input'])
+        encoded_y = self.tokenizer.tokenize(data_dict['output'])
 
         data = torch.stack((torch.tensor(encoded_x.input_ids), 
                             torch.tensor(encoded_x.attention_mask), 
