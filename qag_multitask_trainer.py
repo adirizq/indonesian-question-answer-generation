@@ -12,9 +12,9 @@ from pytorch_lightning.loggers import CSVLogger
 from pytorch_lightning import Trainer, seed_everything
 from pytorch_lightning.callbacks import ModelCheckpoint, TQDMProgressBar, EarlyStopping
 
-from Utils.data_loader import PipelineQAGDataModule
-from Utils.utils import ModelType, PipeLineTaskType, Tokenizer
-from Models.qag_model import QAGPipelineModel
+from Utils.data_loader import MultiTaskQAGDataModule
+from Utils.utils import ModelType, MultiTaskTestType, Tokenizer
+from Models.qag_model import QAGMultiTaskModel
 
 
 def initialize_pretrained_model(name, tokenizer_len, max_length):
@@ -33,7 +33,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Trainer Parser')
     parser.add_argument('-ac', '--accelerator', choices=['gpu', 'cpu'], default='gpu', help='Accelerator for training')
     parser.add_argument('-rd', '--recreate_dataset', default=False, help='Recreate dataset for data loader', action=argparse.BooleanOptionalAction)
-    parser.add_argument('-t', '--task_type', choices=['ae', 'qg'], required=True, help='Model task for training')
     parser.add_argument('-m', '--model_type', choices=['IndoBART', 'Flan-T5'], required=True, help='Pretrained model for training')
     parser.add_argument('-e', '--max_epochs', type=int, default=50, help='Max epochs for training')
     parser.add_argument('-b', '--batch_size', type=int, default=8, help='Batch size for training')
@@ -45,7 +44,6 @@ if __name__ == "__main__":
 
     accelerator = config['accelerator']
     recreate = config['recreate_dataset']
-    task_type = PipeLineTaskType(config['task_type'])
     model_type = ModelType(config['model_type'])
     max_epochs = config['max_epochs']
     batch_size = config['batch_size']
@@ -59,7 +57,7 @@ if __name__ == "__main__":
 
     print(dedent(f'''
     -----------------------------------------------
-          {task_type.value.upper()} Train Information        
+          MultiTask Train Information        
     -----------------------------------------------
      Name                | Value       
     -----------------------------------------------
@@ -76,7 +74,7 @@ if __name__ == "__main__":
 
     tokenizer = Tokenizer(model_type=model_type, max_length=512)
     pretrained_model = initialize_pretrained_model(model_info[model_type]['pre_trained'], tokenizer.tokenizer_len(), max_length)
-    model = QAGPipelineModel(pretrained_model, task_type, tokenizer, model_info[model_type]['lr_scheduler'], learning_rate)
+    model = QAGMultiTaskModel(pretrained_model, tokenizer, model_info[model_type]['lr_scheduler'], learning_rate)
 
 
     dataset_csv_paths = [
@@ -86,14 +84,13 @@ if __name__ == "__main__":
             ]
     
     dataset_tensor_paths = [
-            f'Datasets/Tensor/gemini_train_{task_type.value}_{model_type.value}.pt', 
-            f'Datasets/Tensor/gemini_validation_{task_type.value}_{model_type.value}.pt', 
-            f'Datasets/Tensor/gemini_test_{task_type.value}_{model_type.value}.pt'
+            f'Datasets/Tensor/gemini_train_multitask_{model_type.value}.pt', 
+            f'Datasets/Tensor/gemini_validation_multitask_{model_type.value}.pt', 
+            f'Datasets/Tensor/gemini_test_multitask_{model_type.value}.pt'
             ]
 
-    data_module = PipelineQAGDataModule(
+    data_module = MultiTaskQAGDataModule(
         model_type=model_type,
-        task_type=task_type,
         dataset_csv_paths=dataset_csv_paths,
         dataset_tensor_paths=dataset_tensor_paths,
         tokenizer=tokenizer,
@@ -102,17 +99,17 @@ if __name__ == "__main__":
     )
 
 
-    Path(f'./CSV Logs/Pipeline/{task_type.value}').mkdir(parents=True, exist_ok=True)
-    Path(f'./Checkpoints/Pipeline/{task_type.value}').mkdir(parents=True, exist_ok=True)
+    Path(f'./CSV Logs/MultiTask').mkdir(parents=True, exist_ok=True)
+    Path(f'./Checkpoints/MultiTask').mkdir(parents=True, exist_ok=True)
 
-    csv_logger = CSVLogger(f'CSV Logs', name=f'Pipeline/{task_type.value}/{model_type.value}')
-    checkpoint_callback = ModelCheckpoint(dirpath=f'./Checkpoints/Pipeline/{task_type.value}/{model_type.value}', filename='{epoch}-{val_loss:.2f}', monitor='val_loss', mode='min')
+    csv_logger = CSVLogger(f'CSV Logs', name=f'MultiTask/{model_type.value}')
+    checkpoint_callback = ModelCheckpoint(dirpath=f'./Checkpoints/MultiTask/{model_type.value}', filename='{epoch}-{val_loss:.2f}', monitor='val_loss', mode='min')
     early_stop_callback = EarlyStopping(monitor='val_loss', min_delta=0.000, check_on_train_epoch_end=1, patience=3, mode='min')
     tqdm_progress_bar = TQDMProgressBar()
 
     trainer = Trainer(
         accelerator=accelerator,
-        default_root_dir=f'./Checkpoints/Pipeline/{task_type.value}/{model_type.value}',
+        default_root_dir=f'./Checkpoints/MultiTask/{model_type.value}',
         callbacks=[checkpoint_callback, early_stop_callback, tqdm_progress_bar],
         logger=[csv_logger],
         max_epochs=max_epochs,
@@ -123,10 +120,19 @@ if __name__ == "__main__":
     print('\n[ Start Training ]\n')
     trainer.fit(model, datamodule=data_module)
 
-    print('\n[ Start Test ]\n')
-    trainer.test(datamodule=data_module, ckpt_path='best')
+
+    print('\n[ Start AE Test ]\n')
+    data_module.setup('ae_test')
+    model.test_type = MultiTaskTestType('ae')
+    trainer.test(model, datamodule=data_module, ckpt_path='best')
+
+
+    print('\n[ Start QG Test ]\n')
+    data_module.setup('qg_test')
+    model.test_type = MultiTaskTestType('qg')
+    trainer.test(model, datamodule=data_module, ckpt_path='best')
 
 
     # print('\n[ Save Trained Model ]\n')
 
-    # Path(f'./Trained Model/Pipeline/{task_type.value}/{model_type.value}').mkdir(parents=True, exist_ok=True)
+    # Path(f'./Trained Model/MultiTask/{model_type.value}').mkdir(parents=True, exist_ok=True)

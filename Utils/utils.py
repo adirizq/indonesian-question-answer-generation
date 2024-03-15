@@ -290,7 +290,7 @@ class Evaluator:
         return score['rouge1'], score['rouge2'], score['rougeL'], score['rougeLsum']
     
 
-    def evaluate_pipeline(self, task_type, test_step_outputs):
+    def evaluate(self, task_type, test_step_outputs):
         predictions = test_step_outputs['outputs']
         references = [[label] for label in test_step_outputs['labels']]
 
@@ -336,5 +336,10 @@ class ModelType(Enum):
 
 
 class PipeLineTaskType(Enum):
+    QUESTION_GENERATION = 'qg'
+    ANSWER_EXTRACTION = 'ae'
+
+
+class MultiTaskTestType(Enum):
     QUESTION_GENERATION = 'qg'
     ANSWER_EXTRACTION = 'ae'

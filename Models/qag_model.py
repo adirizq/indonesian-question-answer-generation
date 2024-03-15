@@ -174,9 +174,9 @@ class QAGModel(pl.LightningModule):
         return avg_loss
 
 
-class QAGMultiTask(pl.LightningModule):
-    def __init__(self, pretrained_model, tokenizer, lr_scheduler, learning_rate=1e-5):
-        super(QAGMultiTask, self).__init__()
+class QAGMultiTaskModel(pl.LightningModule):
+    def __init__(self, pretrained_model, tokenizer: Tokenizer, lr_scheduler, learning_rate=1e-5):
+        super(QAGMultiTaskModel, self).__init__()
 
         self.model = pretrained_model
         self.tokenizer = tokenizer
@@ -196,64 +196,6 @@ class QAGMultiTask(pl.LightningModule):
         }
 
     
-    def decode(self, text, is_output=False):
-        decoded = self.tokenizer.decode(text).replace('<pad>', '').replace('<s>', '').replace('</s>', '').replace('<unk>', '')
-        if is_output:
-            decoded = decoded.split('<hl>')[1] if '<hl>' in decoded else decoded
-        return decoded.strip()
-    
-
-    def evaluation(self, task):
-        label_dict = {}
-        processed_labels = [] 
-
-        for d_input, d_label in zip(self.test_step_outputs['input_ids'], self.test_step_outputs['labels']):
-          if not d_label in label_dict:
-            label_dict[d_input] = []
-          label_dict[d_input].append(d_label)
-
-        for d_input in self.test_step_outputs['input_ids']:
-          processed_labels.append(label_dict[d_input])
-
-        score_exact_match = self.exact_match_evaluation(predictions=self.test_step_outputs['outputs'], references=processed_labels)
-        score_bleu = self.bleu.compute(predictions=self.test_step_outputs['outputs'], references=processed_labels)["bleu"]
-        score_meteor = self.meteor.compute(predictions=self.test_step_outputs['outputs'], references=processed_labels)["meteor"]
-        score_rouge = self.rouge.compute(predictions=self.test_step_outputs['outputs'], references=processed_labels)
-        score_rouge1 = score_rouge['rouge1']
-        score_rouge2 = score_rouge['rouge2']
-        score_rougeL = score_rouge['rougeL']
-        score_rougeLsum = score_rouge['rougeLsum']
-
-
-        print(dedent(f'''
-        -----------------------------------------------
-                         {str(task).upper()} Test Result        
-        -----------------------------------------------
-        Name                | Value       
-        -----------------------------------------------
-        Exact Match         | {score_exact_match}
-        Bleu                | {score_bleu}
-        Meteor              | {score_meteor}
-        Rouge1              | {score_rouge1}
-        Rouge2              | {score_rouge2}
-        RougeL              | {score_rougeL}
-        RougeLsum           | {score_rougeLsum}
-        -----------------------------------------------
-        '''))
-
-        print(dedent(f'''
-        -----------------------------------------------
-                      {str(task).upper()} Prediction Result        
-        -----------------------------------------------
-        '''))
-        for d_pred, d_label in zip(self.test_step_outputs['outputs'], processed_labels):
-            print(f'Predictions:\n{d_pred}')
-            print(f'Labels:\n{d_label}\n') 
-
-
-        return score_exact_match, score_bleu, score_meteor, score_rouge1, score_rouge2, score_rougeL, score_rougeLsum
-    
-
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.parameters(), lr=self.lr,  betas=(0.9, 0.999), eps=1e-08)
 
@@ -300,16 +242,18 @@ class QAGMultiTask(pl.LightningModule):
 
 
     def on_test_epoch_end(self):
-        
-        score_exact_match, score_bleu, score_meteor, score_rouge1, score_rouge2, score_rougeL, score_rougeLsum = self.evaluation(self.test_type)
 
-        self.log_dict({f"{self.test_type}_test_exact_match": score_exact_match,
-                       f"{self.test_type}_test_bleu": score_bleu,
-                       f"{self.test_type}_test_meteor": score_meteor,
-                       f"{self.test_type}_test_rouge1": score_rouge1,
-                       f"{self.test_type}_test_rouge2": score_rouge2,
-                       f"{self.test_type}_test_rougeL": score_rougeL,
-                       f"{self.test_type}_test_rougeLsum": score_rougeLsum
+        evaluator = Evaluator()
+        
+        score_exact_match, score_bleu, score_meteor, score_rouge1, score_rouge2, score_rougeL, score_rougeLsum = evaluator.evaluate(self.test_type, self.test_step_outputs)
+
+        self.log_dict({f"{self.task_type.value}_test_exact_match": score_exact_match,
+                       f"{self.task_type.value}_test_bleu": score_bleu,
+                       f"{self.task_type.value}_test_meteor": score_meteor,
+                       f"{self.task_type.value}_test_rouge1": score_rouge1,
+                       f"{self.task_type.value}_test_rouge2": score_rouge2,
+                       f"{self.task_type.value}_test_rougeL": score_rougeL,
+                       f"{self.task_type.value}_test_rougeLsum": score_rougeLsum
                        }, on_epoch=True)
 
 
@@ -321,7 +265,6 @@ class QAGPipelineModel(pl.LightningModule):
         self.model = pretrained_model
         self.task_type = task_type
         self.tokenizer = tokenizer
-        self.task_type = task_type
         self.lr_scheduler = lr_scheduler
         self.lr = learning_rate
 
@@ -385,7 +328,7 @@ class QAGPipelineModel(pl.LightningModule):
 
         evaluator = Evaluator()
         
-        score_exact_match, score_bleu, score_meteor, score_rouge1, score_rouge2, score_rougeL, score_rougeLsum = evaluator.evaluate_pipeline(self.task_type, self.test_step_outputs)
+        score_exact_match, score_bleu, score_meteor, score_rouge1, score_rouge2, score_rougeL, score_rougeLsum = evaluator.evaluate(self.task_type, self.test_step_outputs)
 
         self.log_dict({f"{self.task_type.value}_test_exact_match": score_exact_match,
                        f"{self.task_type.value}_test_bleu": score_bleu,
