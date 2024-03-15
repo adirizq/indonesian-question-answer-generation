@@ -234,9 +234,9 @@ class QAGMultiTaskModel(pl.LightningModule):
         out = self.model.generate(input_ids)
 
         for idx in range(len(input_ids)):
-            self.test_step_outputs['input_ids'].append(self.decode(input_ids[idx]))
-            self.test_step_outputs['outputs'].append(self.decode(out[idx], is_output=True))
-            self.test_step_outputs['labels'].append(self.decode(labels[idx], is_output=True))
+            self.test_step_outputs['input_ids'].append(self.tokenizer.decode(input_ids[idx]))
+            self.test_step_outputs['outputs'].append(self.tokenizer.decode_for_answer_or_question(out[idx]))
+            self.test_step_outputs['labels'].append(self.tokenizer.decode_for_answer_or_question(labels[idx]))
 
         return 0
 
