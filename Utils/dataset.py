@@ -87,7 +87,7 @@ class MultiTaskDataset(Dataset):
             'output': []
         }
 
-        df = pd.read_csv(self.csv_path)[['sentence_highlighted_context', 'answer_highlighted_context', 'question']][:100]
+        df = pd.read_csv(self.csv_path)[['sentence_highlighted_context', 'answer_highlighted_context', 'question']]
         
 
         if self.test_type is None:
