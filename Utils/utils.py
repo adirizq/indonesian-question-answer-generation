@@ -290,7 +290,7 @@ class Evaluator:
         return score['rouge1'], score['rouge2'], score['rougeL'], score['rougeLsum']
     
 
-    def evaluate(self, task_type, test_step_outputs):
+    def evaluate(self, task_type, test_step_outputs, predictions_save_path):
         predictions = test_step_outputs['outputs']
         references = [[label] for label in test_step_outputs['labels']]
 
@@ -323,7 +323,11 @@ class Evaluator:
 
         for d_pred, d_label in zip(predictions, references):
             print(f'Predictions:\n{d_pred}')
-            print(f'Labels:\n{d_label}\n') 
+            print(f'Labels:\n{d_label}\n')
+
+
+        os.makedirs(os.path.dirname(predictions_save_path), exist_ok=True)
+        pd.DataFrame({'Predictions': predictions, 'Labels': references}).to_csv(predictions_save_path, index=False)
 
 
         return score_exact_match, score_bleu, score_meteor, score_rouge1, score_rouge2, score_rougeL, score_rougeLsum

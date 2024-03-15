@@ -74,7 +74,7 @@ if __name__ == "__main__":
 
     tokenizer = Tokenizer(model_type=model_type, max_length=512)
     pretrained_model = initialize_pretrained_model(model_info[model_type]['pre_trained'], tokenizer.tokenizer_len(), max_length)
-    model = QAGMultiTaskModel(pretrained_model, tokenizer, model_info[model_type]['lr_scheduler'], learning_rate)
+    model = QAGMultiTaskModel(pretrained_model, model_info[model_type]['type'], tokenizer, model_info[model_type]['lr_scheduler'], learning_rate)
 
 
     dataset_csv_paths = [

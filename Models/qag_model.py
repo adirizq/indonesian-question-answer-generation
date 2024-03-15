@@ -175,10 +175,11 @@ class QAGModel(pl.LightningModule):
 
 
 class QAGMultiTaskModel(pl.LightningModule):
-    def __init__(self, pretrained_model, tokenizer: Tokenizer, lr_scheduler, learning_rate=1e-5):
+    def __init__(self, pretrained_model, model_type, tokenizer: Tokenizer, lr_scheduler, learning_rate=1e-5):
         super(QAGMultiTaskModel, self).__init__()
 
         self.model = pretrained_model
+        self.model_type = model_type
         self.tokenizer = tokenizer
         self.lr_scheduler = lr_scheduler
         self.lr = learning_rate
@@ -245,7 +246,7 @@ class QAGMultiTaskModel(pl.LightningModule):
 
         evaluator = Evaluator()
         
-        score_exact_match, score_bleu, score_meteor, score_rouge1, score_rouge2, score_rougeL, score_rougeLsum = evaluator.evaluate(self.test_type, self.test_step_outputs)
+        score_exact_match, score_bleu, score_meteor, score_rouge1, score_rouge2, score_rougeL, score_rougeLsum = evaluator.evaluate(self.test_type, self.test_step_outputs, f'./Predictions/Multitask/{self.model_type}.csv')
 
         self.log_dict({f"{self.test_type.value}_test_exact_match": score_exact_match,
                        f"{self.test_type.value}_test_bleu": score_bleu,
@@ -259,10 +260,11 @@ class QAGMultiTaskModel(pl.LightningModule):
 
 class QAGPipelineModel(pl.LightningModule):
     
-    def __init__(self, pretrained_model, task_type, tokenizer: Tokenizer, lr_scheduler, learning_rate=1e-5):
+    def __init__(self, pretrained_model, model_type, task_type, tokenizer: Tokenizer, lr_scheduler, learning_rate=1e-5):
         super(QAGPipelineModel, self).__init__()
 
         self.model = pretrained_model
+        self.model_type = model_type
         self.task_type = task_type
         self.tokenizer = tokenizer
         self.lr_scheduler = lr_scheduler
@@ -328,7 +330,7 @@ class QAGPipelineModel(pl.LightningModule):
 
         evaluator = Evaluator()
         
-        score_exact_match, score_bleu, score_meteor, score_rouge1, score_rouge2, score_rougeL, score_rougeLsum = evaluator.evaluate(self.task_type, self.test_step_outputs)
+        score_exact_match, score_bleu, score_meteor, score_rouge1, score_rouge2, score_rougeL, score_rougeLsum = evaluator.evaluate(self.task_type, self.test_step_outputs, f'./Predictions/Pipeline/{self.task_type.value}/{self.model_type}.csv')
 
         self.log_dict({f"{self.task_type.value}_test_exact_match": score_exact_match,
                        f"{self.task_type.value}_test_bleu": score_bleu,
