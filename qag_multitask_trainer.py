@@ -86,7 +86,8 @@ if __name__ == "__main__":
     dataset_tensor_paths = [
             f'Datasets/Tensor/gemini_train_multitask_{model_type.value}.pt', 
             f'Datasets/Tensor/gemini_validation_multitask_{model_type.value}.pt', 
-            f'Datasets/Tensor/gemini_test_multitask_{model_type.value}.pt'
+            f'Datasets/Tensor/gemini_ae_test_multitask_{model_type.value}.pt',
+            f'Datasets/Tensor/gemini_qg_test_multitask_{model_type.value}.pt',
             ]
 
     data_module = MultiTaskQAGDataModule(

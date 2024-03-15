@@ -48,7 +48,7 @@ class MultiTaskQAGDataModule(pl.LightningDataModule):
         super(MultiTaskQAGDataModule, self).__init__()
 
         self.train_csv_path, self.validation_csv_path, self.test_csv_path = dataset_csv_paths
-        self.train_tensor_path, self.validation_tensor_path, self.test_tensor_path = dataset_tensor_paths
+        self.train_tensor_path, self.validation_tensor_path, self.ae_test_tensor_path, self.qg_test_tensor_path = dataset_tensor_paths
 
         self.model_type = model_type
         self.tokenizer = tokenizer
@@ -61,9 +61,9 @@ class MultiTaskQAGDataModule(pl.LightningDataModule):
             self.train_data = MultiTaskDataset(self.train_csv_path, self.train_tensor_path, self.tokenizer, self.recreate)
             self.valid_data = MultiTaskDataset(self.validation_csv_path, self.validation_tensor_path, self.tokenizer, self.recreate)
         elif stage == "ae_test":
-            self.test_data = MultiTaskDataset(self.test_csv_path, self.test_tensor_path, self.tokenizer, self.recreate, test_type='ae')
+            self.test_data = MultiTaskDataset(self.test_csv_path, self.ae_test_tensor_path, self.tokenizer, self.recreate, test_type='ae')
         elif stage == "qg_test":
-            self.test_data = MultiTaskDataset(self.test_csv_path, self.test_tensor_path, self.tokenizer, self.recreate, test_type='qg')
+            self.test_data = MultiTaskDataset(self.test_csv_path, self.qg_test_tensor_path, self.tokenizer, self.recreate, test_type='qg')
 
 
     def train_dataloader(self):
