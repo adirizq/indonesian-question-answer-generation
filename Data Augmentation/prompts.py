@@ -127,3 +127,103 @@ class Prompts():
         If the question and answer is correct and coherent with the story, return "True".
         Only answer with True or False.
     '''
+
+    QUESTION_ANSWER_WIKI_PROMPT = '''
+        Write multiple question and short answer about the context below delimited by the triple backtick (```) symbol:
+        
+        ```{CONTEXT}```
+
+        The question and answer should be written in Bahasa Indonesia.
+        The question should be suitable for student exam or test.
+        The answer should be a short answer that can be found in the context.
+        The answer should be extracted from the context and should be exactly the same as stated in the context, do not change the capitalization and the arrangement.
+        The minimum number of question and answer is 1 and the maximum is 5.
+
+        Your response should be in JSON format with the following keys: question, answer.
+
+        
+        Here is an example of the input and output:
+
+        Input:
+        Kesultanan Utsmaniyah, nama resmi Daulat/Negara Agung Utsmaniyah (Ottoman Turkish: دولت عليه عثمانیه Devlet-i ʿAliyye-yi ʿOmâniyye;[6] sering disebut dalam bahasa Turki modern sebagai Osmanlı İmparatorluğu (Kekaisaran Utsmaniyah) atau Osmanlı Devleti (Negara Utsmaniyah); kadang disebut Kesultanan Turki  atau Turki saja; (sering pula disebut Kekaisaran Ottoman yang diambil dari ejaan Barat) adalah kekaisaran lintas benua yang didirikan oleh suku-suku Turki di bawah pimpinan Osman Bey di barat laut Anatolia pada tahun 1299.[7] Setelah 1354, Utsmaniyah melintasi Eropa dan memulai penaklukkan Balkan, mengubah negara Utsmaniyah yang hanya berupa kadipaten kecil menjadi negara lintas benua. Utsmani mengakhiri riwayat Kekaisaran Romawi Timur seiring penaklukan Konstantinopel oleh Mehmed II tahun 1453.[8][9][10]  Sepanjang abad ke-16 dan 17, tepatnya pada puncak kekuasaannya di bawah pemerintahan Suleiman Al-Qanuni, Kesultanan Utsmaniyah adalah salah satu negara terkuat di dunia, imperium multinasional dan multibahasa yang mengendalikan sebagian besar Eropa Tenggara, Asia Barat/Kaukasus, Afrika Utara, dan Tanduk Afrika.[11]
+
+        Output:
+        [
+            {
+                "question": "Dimanakah Kesultanan Utsmaniyah berkuasa?",
+                "answer": "barat laut Anatolia"
+            },
+            {
+                "question": "Kapan Kesultanan Utsmaniyah didirikan?",
+                "answer": "tahun 1299"
+            },
+            {
+                "question": "Kapan Utsmani mengakhiri riwayat Kekaisaran Romawi Timur?",
+                "answer": "tahun 1453"
+            },
+            {
+                "question": "Siapa yang menaklukan Konstantinopel?",
+                "answer": "Mehmed II"
+            }
+        ]
+
+        
+        Input:
+        Penemu telepon genggam yang pertama adalah Martin Cooper, seorang karyawan Motorola pada tanggal 03 April 1973, walaupun banyak disebut-sebut penemu telepon genggam adalah sebuah tim dari salah satu divisi Motorola (divisi tempat Cooper bekerja) dengan model pertama adalah DynaTAC. Ide yang dicetuskan oleh Cooper adalah sebuah alat komunikasi yang kecil dan mudah dibawa bepergian secara fleksibel.
+
+        Output:
+        [
+            {
+                "question": "Siapa penemu telepon genggam pertama?",
+                "answer": "Martin Cooper"
+            },
+            {
+                "question": "Kapan telepon genggam pertama ditemukan?",
+                "answer": "03 April 1973"
+            },
+            {
+                "question": "Dimana Martin Cooper bekerja?",
+                "answer": "Motorola"
+            }
+        ]
+
+
+        Input:
+        Kompleks bangunan Candi Penataran menempati areal tanah seluas 12.946 meter persegi berjajar membujur dari barat laut ke timur dan tenggara. Seluruh halaman komplek percandian kecuali yang bagian tenggara dibagi menjadi tiga bagian, yang dipisahkan oleh dua dinding. Untuk lebih mudahnya dalam memahami kompek Candi Penataran, bagian-bagian dari Candi Penataran disebut halaman depan, halaman tengah, dan halaman belakang. Susunan dari komplek Candi Penataran yang sangat unik dan tidak tersusun simetris. Hal ini mengambarkan bahwa pembuatan candi tidak dalam satu periode.
+        
+        Output:
+        [
+            {
+                "question": "Berapakah luas kompleks bangunan Candi Penataran?",
+                "answer": "12.946 meter persegi"
+            },
+            {
+                "question": "Membujur dari mana ke mana kompleks bangunan Candi Penataran?",
+                "answer": "dari barat laut ke timur dan tenggara"
+            },
+            {
+                "question": "Halaman komplek percandian dibagi menjadi berapa bagian?",
+                "answer": "tiga bagian"
+            },
+            {
+                "question": "Disebut apa saja bagian-bagian dari Candi Penataran?",
+                "answer": "halaman depan, halaman tengah, dan halaman belakang"
+            },
+            {
+                "question": "Apakah susunan dari komplek Candi Penataran simetris?",
+                "answer": "Tidak"
+            }
+        ]
+
+    '''.strip()
+
+    VERIFY_QUESTION_ANSWER_WIKI_PROMPT = '''
+        Your task is to verify the wether question and answer is correct or coherent with context.
+
+        Context: {CONTEXT}
+        Question: {QUESTION}
+        Answer: {ANSWER}
+
+        If the question and answer is correct and coherent with the context, return "True".
+        Only answer with True or False.
+    '''
