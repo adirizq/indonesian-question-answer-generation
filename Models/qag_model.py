@@ -340,3 +340,87 @@ class QAGPipelineModel(pl.LightningModule):
                        f"{self.task_type.value}_test_rougeL": score_rougeL,
                        f"{self.task_type.value}_test_rougeLsum": score_rougeLsum
                        }, on_epoch=True)
+
+
+class QAGEnd2EndModel(pl.LightningModule):
+    
+    def __init__(self, pretrained_model, model_type, task_type, tokenizer: Tokenizer, lr_scheduler, learning_rate=1e-5):
+        super(QAGPipelineModel, self).__init__()
+
+        self.model = pretrained_model
+        self.model_type = model_type
+        self.task_type = task_type
+        self.tokenizer = tokenizer
+        self.lr_scheduler = lr_scheduler
+        self.lr = learning_rate
+
+        self.bleu = evaluate.load('bleu')
+        self.meteor = evaluate.load('meteor')
+        self.rouge = evaluate.load('rouge')
+
+        self.test_step_outputs = {
+          'input_ids': [],
+          'outputs': [],
+          'labels': [],
+        }
+
+
+    def configure_optimizers(self):
+        optimizer = torch.optim.Adam(self.parameters(), lr=self.lr,  betas=(0.9, 0.999), eps=1e-08)
+
+        if self.lr_scheduler:
+            scheduler = StepLR(optimizer, step_size=1, gamma=0.9)
+            return {"optimizer": optimizer, "lr_scheduler": scheduler}
+
+        return optimizer
+    
+
+    def forward(self, input_ids, attention_mask, labels):
+        return self.model(input_ids=input_ids, attention_mask=attention_mask, labels=labels)
+    
+
+    def training_step(self, train_batch, batch_idx):
+        input_ids, attention_mask, labels = train_batch
+
+        out = self(input_ids, attention_mask, labels)
+        self.log_dict({'train_loss': out.loss}, prog_bar=True, on_epoch=True)
+
+        return out.loss
+
+
+    def validation_step(self, valid_batch, batch_idx):
+        input_ids, attention_mask, labels = valid_batch
+
+        out = self(input_ids, attention_mask, labels)
+        self.log_dict({'val_loss': out.loss}, prog_bar=True, on_epoch=True)
+
+        return out.loss
+    
+
+    def test_step(self, test_batch, batch_idx):
+        input_ids, attention_mask, labels = test_batch
+
+        out = self.model.generate(input_ids)
+
+        for idx in range(len(input_ids)):
+            self.test_step_outputs['input_ids'].append(self.tokenizer.decode(input_ids[idx]))
+            self.test_step_outputs['outputs'].append(self.tokenizer.decode_for_answer_or_question(out[idx]))
+            self.test_step_outputs['labels'].append(self.tokenizer.decode_for_answer_or_question(labels[idx]))
+
+        return 0
+
+
+    def on_test_epoch_end(self):
+
+        evaluator = Evaluator()
+        
+        score_exact_match, score_bleu, score_meteor, score_rouge1, score_rouge2, score_rougeL, score_rougeLsum = evaluator.evaluate(self.task_type, self.test_step_outputs, f'./Predictions/End2End/{self.task_type.value}/{self.model_type}.csv')
+
+        self.log_dict({f"{self.task_type.value}_test_exact_match": score_exact_match,
+                       f"{self.task_type.value}_test_bleu": score_bleu,
+                       f"{self.task_type.value}_test_meteor": score_meteor,
+                       f"{self.task_type.value}_test_rouge1": score_rouge1,
+                       f"{self.task_type.value}_test_rouge2": score_rouge2,
+                       f"{self.task_type.value}_test_rougeL": score_rougeL,
+                       f"{self.task_type.value}_test_rougeLsum": score_rougeLsum
+                       }, on_epoch=True)
