@@ -16,6 +16,7 @@ from Utils.data_loader import PipelineQAGDataModule
 from Utils.utils import ModelType, PipeLineTaskType, Tokenizer
 from Models.qag_model import QAGPipelineModel
 
+torch.multiprocessing.set_sharing_strategy('file_system')
 
 def initialize_pretrained_model(name, tokenizer_len, max_length):
     model = AutoModelForSeq2SeqLM.from_pretrained(name)
