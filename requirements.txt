@@ -4,7 +4,7 @@ indobenchmark_toolkit==0.1.6
 pandas
 pytorch_lightning==2.1.0
 stanza
-torch
+torch==2.0.0+cu118
 tqdm
 transformers==4.28.0
 nltk==3.7
