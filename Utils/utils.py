@@ -290,7 +290,7 @@ class Evaluator:
         return score['rouge1'], score['rouge2'], score['rougeL'], score['rougeLsum']
     
 
-    def evaluate(self, task_type, test_step_outputs, predictions_save_path):
+    def evaluate(self, test_step_outputs, predictions_save_path, task_type=None):
         predictions = test_step_outputs['outputs']
         references = [[label] for label in test_step_outputs['labels']]
 
@@ -299,9 +299,14 @@ class Evaluator:
         score_meteor = self.meteor_score(predictions=predictions, references=references)
         score_rouge1, score_rouge2, score_rougeL, score_rougeLsum = self.rouge_score(predictions=predictions, references=references)
 
+        if task_type is None:
+            task_type_value = ''
+        else:
+            task_type_value = task_type.value
+
         print(dedent(f'''
         -----------------------------------------------
-                            {str(task_type.value).upper()} Test Result        
+                            {str(task_type_value).upper()} Test Result        
         -----------------------------------------------
         Name                | Value       
         -----------------------------------------------
@@ -317,7 +322,7 @@ class Evaluator:
 
         print(dedent(f'''
         -----------------------------------------------
-                        {str(task_type.value).upper()} Prediction Result        
+                        {str(task_type_value).upper()} Prediction Result        
         -----------------------------------------------
         '''))
 

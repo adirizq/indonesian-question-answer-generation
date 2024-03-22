@@ -246,7 +246,7 @@ class QAGMultiTaskModel(pl.LightningModule):
 
         evaluator = Evaluator()
         
-        score_exact_match, score_bleu, score_meteor, score_rouge1, score_rouge2, score_rougeL, score_rougeLsum = evaluator.evaluate(self.test_type, self.test_step_outputs, f'./Predictions/Multitask/{self.model_type}.csv')
+        score_exact_match, score_bleu, score_meteor, score_rouge1, score_rouge2, score_rougeL, score_rougeLsum = evaluator.evaluate(self.test_step_outputs, f'./Predictions/Multitask/{self.model_type}.csv', self.test_type)
 
         self.log_dict({f"{self.test_type.value}_test_exact_match": score_exact_match,
                        f"{self.test_type.value}_test_bleu": score_bleu,
@@ -330,7 +330,7 @@ class QAGPipelineModel(pl.LightningModule):
 
         evaluator = Evaluator()
         
-        score_exact_match, score_bleu, score_meteor, score_rouge1, score_rouge2, score_rougeL, score_rougeLsum = evaluator.evaluate(self.task_type, self.test_step_outputs, f'./Predictions/Pipeline/{self.task_type.value}/{self.model_type}.csv')
+        score_exact_match, score_bleu, score_meteor, score_rouge1, score_rouge2, score_rougeL, score_rougeLsum = evaluator.evaluate(self.test_step_outputs, f'./Predictions/Pipeline/{self.task_type.value}/{self.model_type}.csv', self.task_type)
 
         self.log_dict({f"{self.task_type.value}_test_exact_match": score_exact_match,
                        f"{self.task_type.value}_test_bleu": score_bleu,
@@ -344,12 +344,11 @@ class QAGPipelineModel(pl.LightningModule):
 
 class QAGEnd2EndModel(pl.LightningModule):
     
-    def __init__(self, pretrained_model, model_type, task_type, tokenizer: Tokenizer, lr_scheduler, learning_rate=1e-5):
-        super(QAGPipelineModel, self).__init__()
+    def __init__(self, pretrained_model, model_type, tokenizer: Tokenizer, lr_scheduler, learning_rate=1e-5):
+        super(QAGEnd2EndModel, self).__init__()
 
         self.model = pretrained_model
         self.model_type = model_type
-        self.task_type = task_type
         self.tokenizer = tokenizer
         self.lr_scheduler = lr_scheduler
         self.lr = learning_rate
@@ -414,13 +413,13 @@ class QAGEnd2EndModel(pl.LightningModule):
 
         evaluator = Evaluator()
         
-        score_exact_match, score_bleu, score_meteor, score_rouge1, score_rouge2, score_rougeL, score_rougeLsum = evaluator.evaluate(self.task_type, self.test_step_outputs, f'./Predictions/End2End/{self.task_type.value}/{self.model_type}.csv')
+        score_exact_match, score_bleu, score_meteor, score_rouge1, score_rouge2, score_rougeL, score_rougeLsum = evaluator.evaluate(self.test_step_outputs, f'./Predictions/End2End/{self.model_type}.csv')
 
-        self.log_dict({f"{self.task_type.value}_test_exact_match": score_exact_match,
-                       f"{self.task_type.value}_test_bleu": score_bleu,
-                       f"{self.task_type.value}_test_meteor": score_meteor,
-                       f"{self.task_type.value}_test_rouge1": score_rouge1,
-                       f"{self.task_type.value}_test_rouge2": score_rouge2,
-                       f"{self.task_type.value}_test_rougeL": score_rougeL,
-                       f"{self.task_type.value}_test_rougeLsum": score_rougeLsum
+        self.log_dict({f"test_exact_match": score_exact_match,
+                       f"test_bleu": score_bleu,
+                       f"test_meteor": score_meteor,
+                       f"test_rouge1": score_rouge1,
+                       f"test_rouge2": score_rouge2,
+                       f"test_rougeL": score_rougeL,
+                       f"test_rougeLsum": score_rougeLsum
                        }, on_epoch=True)
