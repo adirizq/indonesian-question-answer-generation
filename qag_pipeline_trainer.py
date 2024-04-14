@@ -81,15 +81,15 @@ if __name__ == "__main__":
 
 
     dataset_csv_paths = [
-            'Datasets/Splitted/gemini_train.csv', 
-            'Datasets/Splitted/gemini_validation.csv', 
-            'Datasets/Splitted/gemini_test.csv'
+            'Datasets/Splitted/gemini_wiki_train.csv', 
+            'Datasets/Splitted/gemini_wiki_validation.csv', 
+            'Datasets/Splitted/gemini_wiki_test.csv'
             ]
     
     dataset_tensor_paths = [
-            f'Datasets/Tensor/gemini_train_{task_type.value}_{model_type.value}.pt', 
-            f'Datasets/Tensor/gemini_validation_{task_type.value}_{model_type.value}.pt', 
-            f'Datasets/Tensor/gemini_test_{task_type.value}_{model_type.value}.pt'
+            f'Datasets/Tensor/gemini_wiki_train_{task_type.value}_{model_type.value}.pt', 
+            f'Datasets/Tensor/gemini_wiki_validation_{task_type.value}_{model_type.value}.pt', 
+            f'Datasets/Tensor/gemini_wiki_test_{task_type.value}_{model_type.value}.pt'
             ]
 
     data_module = PipelineQAGDataModule(

@@ -79,15 +79,15 @@ if __name__ == "__main__":
 
 
     dataset_csv_paths = [
-            'Datasets/Splitted/gemini_train.csv', 
-            'Datasets/Splitted/gemini_validation.csv', 
-            'Datasets/Splitted/gemini_test.csv'
+            'Datasets/Splitted/gemini_wiki_train.csv', 
+            'Datasets/Splitted/gemini_wiki_validation.csv', 
+            'Datasets/Splitted/gemini_wiki_test.csv'
             ]
     
     dataset_tensor_paths = [
-            f'Datasets/Tensor/gemini_train_end2end_{model_type.value}.pt', 
-            f'Datasets/Tensor/gemini_validation_end2end_{model_type.value}.pt', 
-            f'Datasets/Tensor/gemini_test_end2end_{model_type.value}.pt'
+            f'Datasets/Tensor/gemini_wiki_train_end2end_{model_type.value}.pt', 
+            f'Datasets/Tensor/gemini_wiki_validation_end2end_{model_type.value}.pt', 
+            f'Datasets/Tensor/gemini_wiki_test_end2end_{model_type.value}.pt'
             ]
 
     data_module = End2EndQAGDataModule(

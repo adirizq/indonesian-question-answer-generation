@@ -8,3 +8,5 @@ Datasets/**/*.pt
 !Datasets/qag_dataset.zip
 Old/
 .env
+Trained Model/
+Predictions/
