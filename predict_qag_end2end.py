@@ -113,13 +113,12 @@ if __name__ == "__main__":
     model.eval()
 
     prediction_results = {
+        'inputs': [],
         'ae_predictions': [],
         'ae_labels': [],
         'qg_predictions': [],
         'qg_labels': []
     }
-
-    qa_predictions = []
 
     for batch in tqdm(dataloader, total=len(dataloader), desc='Generating Predictions'):
         input_ids, attention_mask, labels = batch
@@ -132,6 +131,8 @@ if __name__ == "__main__":
             outputs = model.model.generate(input_ids)
 
             for idx in range(len(outputs)):
+                prediction_results['inputs'].append(tokenizer.decode(input_ids[idx]).strip())
+
                 pred_question, pred_answer = extract_qa(tokenizer.decode_for_answer_or_question(outputs[idx]).strip())
                 label_question, label_answer = extract_qa(tokenizer.decode_for_answer_or_question(labels[idx]).strip())
 
@@ -146,4 +147,4 @@ if __name__ == "__main__":
     predictions_df = pd.DataFrame(prediction_results)
     predictions_df['qa_format_preds'] = predictions_df.apply(lambda x: f"pertanyaan: {x['qg_predictions']}, jawaban: {x['ae_predictions']}", axis=1)
     predictions_df['qa_format_labels'] = predictions_df.apply(lambda x: f"pertanyaan: {x['qg_labels']}, jawaban: {x['ae_labels']}", axis=1)
-    predictions_df.to_csv(f'Predictions/end2end_{model_type}.csv', index=False)
+    predictions_df.to_csv(f'Predictions/end2end_{model_type.name}.csv', index=False)

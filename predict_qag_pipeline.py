@@ -21,7 +21,7 @@ def initialize_pretrained_model(name, tokenizer_len, max_length):
     model.resize_token_embeddings(tokenizer_len)
     model.config.max_length = max_length
     model.config.early_stopping = True
-    model.config.num_beams = 4
+    model.config.num_beams = 5
 
     return model
 
@@ -137,13 +137,14 @@ if __name__ == "__main__":
     qg_model.eval()
 
     prediction_results = {
+        'inputs': [],
         'ae_predictions': [],
         'ae_labels': [],
         'qg_predictions': [],
         'qg_labels': []
     }
 
-    for ae_batch, qg_batch in tqdm(zip(ae_dataloader, qg_dataloader), total=len(ae_dataloader)):
+    for ae_batch, qg_batch in tqdm(zip(ae_dataloader, qg_dataloader), total=len(ae_dataloader), desc='Generating Predictions'):
         ae_input_ids, ae_attention_mask, ae_labels = ae_batch
         _, _, qg_labels = qg_batch
 
@@ -158,6 +159,7 @@ if __name__ == "__main__":
             ae_outputs = ae_model.model.generate(ae_input_ids)
 
             for idx in range(len(ae_outputs)):
+                prediction_results['inputs'].append(ae_model.tokenizer.decode(ae_input_ids[idx]).strip())
                 temp_ae_predictions_for_qg_input.append(ae_model.tokenizer.decode(ae_outputs[idx]).strip())
                 prediction_results['ae_predictions'].append(ae_model.tokenizer.decode_for_answer_or_question(ae_outputs[idx]).strip())
                 prediction_results['ae_labels'].append(ae_model.tokenizer.decode_for_answer_or_question(ae_labels[idx]).strip())
@@ -169,10 +171,10 @@ if __name__ == "__main__":
                 prediction_results['qg_predictions'].append(qg_model.tokenizer.decode_for_answer_or_question(qg_outputs[idx]).strip())
                 prediction_results['qg_labels'].append(qg_model.tokenizer.decode_for_answer_or_question(qg_labels[idx]).strip())
 
-            break
     
     os.makedirs('Predictions', exist_ok=True)
 
     predictions_df = pd.DataFrame(prediction_results)
     predictions_df['qa_format'] = predictions_df.apply(lambda x: f"pertanyaan: {x['qg_predictions']}, jawaban: {x['ae_predictions']}", axis=1)
-    predictions_df.to_csv('Predictions/pipeline.csv', index=False)
+    predictions_df['qa_format_labels'] = predictions_df.apply(lambda x: f"pertanyaan: {x['qg_labels']}, jawaban: {x['ae_labels']}", axis=1)
+    predictions_df.to_csv(f'Predictions/pipeline_ae_{ae_model_type.name}_qg_{qg_model_type.name}.csv', index=False)
