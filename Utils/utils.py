@@ -350,6 +350,12 @@ class AugmentedWikiDataFormatter:
         # Highlight answer adn context in context
         df['answer_highlighted_context'] = df.progress_apply(highlighter.highlight_answer, axis=1)
         df['sentence_highlighted_context'] = df.progress_apply(highlighter.highlight_sentence, axis=1)
+
+        # Remove duplicated sentence_highlighted_context
+        df = df.drop_duplicates(subset='sentence_highlighted_context')
+
+        # Total duplicated sentence_highlighted_context
+        print(f'[INFO] Total duplicated sentence_highlighted_context: {len(df) - len(json_data)}')
         
         # Save data in CSV format
         df.to_csv(output_highlighted_csv_path, index=False)
