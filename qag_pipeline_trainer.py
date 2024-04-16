@@ -124,8 +124,8 @@ if __name__ == "__main__":
     print('\n[ Start Training ]\n')
     trainer.fit(model, datamodule=data_module)
 
-    print('\n[ Start Test ]\n')
-    trainer.test(datamodule=data_module, ckpt_path='best')
+    # print('\n[ Start Test ]\n')
+    # trainer.test(datamodule=data_module, ckpt_path='best')
 
 
     # print('\n[ Save Trained Model ]\n')

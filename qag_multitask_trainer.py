@@ -123,16 +123,16 @@ if __name__ == "__main__":
     trainer.fit(model, datamodule=data_module)
 
 
-    print('\n[ Start AE Test ]\n')
-    data_module.setup('ae_test')
-    model.test_type = MultiTaskTestType('ae')
-    trainer.test(model, datamodule=data_module, ckpt_path='best')
+    # print('\n[ Start AE Test ]\n')
+    # data_module.setup('ae_test')
+    # model.test_type = MultiTaskTestType('ae')
+    # trainer.test(model, datamodule=data_module, ckpt_path='best')
 
 
-    print('\n[ Start QG Test ]\n')
-    data_module.setup('qg_test')
-    model.test_type = MultiTaskTestType('qg')
-    trainer.test(model, datamodule=data_module, ckpt_path='best')
+    # print('\n[ Start QG Test ]\n')
+    # data_module.setup('qg_test')
+    # model.test_type = MultiTaskTestType('qg')
+    # trainer.test(model, datamodule=data_module, ckpt_path='best')
 
 
     # print('\n[ Save Trained Model ]\n')
