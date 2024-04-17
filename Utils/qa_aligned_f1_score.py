@@ -6,22 +6,30 @@ import numpy as np
 from typing import List
 from itertools import product, chain
 from statistics import mean
-from moverscore import MoverScore
 
 EPS = 1e-6
+
+
+def get_scorer(base_metric, language: str = 'id'):
+    if base_metric == 'bertscore':
+        from .bertscore import BERTScore
+        return BERTScore(language=language)
+    if base_metric == 'moverscore':
+        from .moverscore import MoverScore
+        return MoverScore(language=language)
+    raise ValueError(f'unknown metric {base_metric}: metric should be `moverscore`/`bertscore`')
 
 
 class QAAlignedF1Score:
 
     def __init__(self,
-                 language: str = 'en',
+                 base_metric: str = 'bertscore',
                  instance_separator: str = " | ",
                  question_key: str = 'pertanyaan: ',
                  answer_key: str = 'jawaban: ',
                  qa_separator: str = ', '):
         
-        self.language = language
-        self.base_metric = MoverScore()
+        self.base_metric = get_scorer(base_metric)
         self.instance_separator = instance_separator
         self.question_key = question_key
         self.answer_key = answer_key

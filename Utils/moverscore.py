@@ -24,7 +24,7 @@ def batched_cdist_l2(x1, x2):
 
 class MoverScore:
 
-    def __init__(self):
+    def __init__(self, language='id'):
         self.model_name = 'bert-base-multilingual-cased'
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_name, do_lower_case=True)
         self.model = AutoModel.from_pretrained(self.model_name, output_hidden_states=True, output_attentions=True)
@@ -83,7 +83,7 @@ class MoverScore:
     def word_mover_score(self, refs, hyps, idf_dict_ref, idf_dict_hyp, stop_words=None, batch_size=256):
         stop_words = [] if stop_words is None else stop_words
         preds = []
-        for batch_start in tqdm(list(range(0, len(refs), batch_size))):
+        for batch_start in tqdm(list(range(0, len(refs), batch_size)), disable=True):
             batch_refs = refs[batch_start:batch_start + batch_size]
             batch_hyps = hyps[batch_start:batch_start + batch_size]
 

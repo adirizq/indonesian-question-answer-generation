@@ -148,6 +148,6 @@ if __name__ == "__main__":
     os.makedirs('Predictions', exist_ok=True)
 
     predictions_df = pd.DataFrame(prediction_results)
-    predictions_df['qa_format'] = predictions_df.apply(lambda x: f"pertanyaan: {x['qg_predictions']}, jawaban: {x['ae_predictions']}", axis=1)
+    predictions_df['qa_format_preds'] = predictions_df.apply(lambda x: f"pertanyaan: {x['qg_predictions']}, jawaban: {x['ae_predictions']}", axis=1)
     predictions_df['qa_format_labels'] = predictions_df.apply(lambda x: f"pertanyaan: {x['qg_labels']}, jawaban: {x['ae_labels']}", axis=1)
     predictions_df.to_csv(f'Predictions/multitask_{model_type.name}.csv', index=False)
