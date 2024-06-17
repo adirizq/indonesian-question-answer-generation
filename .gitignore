@@ -10,3 +10,6 @@ Old/
 .env
 Trained Models/
 Predictions/
+Playground/
+Inference/ONNX Models/
+Inference/VertexAI/Models Tar/
