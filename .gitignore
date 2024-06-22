@@ -13,3 +13,6 @@ Predictions/
 Playground/
 Inference/ONNX Models/
 Inference/VertexAI/Models Tar/
+Inference/Hugging Face Spaces/Model
+Inference/Hugging Face Spaces/Tokenizer
+Inference/VertexAI/creds.json
