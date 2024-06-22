@@ -1,3 +1,4 @@
+from pydantic import BaseModel
 from fastapi import FastAPI
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM, pipeline
 
@@ -6,6 +7,11 @@ app = FastAPI()
 
 model = AutoModelForSeq2SeqLM.from_pretrained('Model', local_files_only=True)
 tokenizer = AutoTokenizer.from_pretrained('Tokenizer', local_files_only=True)
+text2text = pipeline('text2text-generation', model=model, tokenizer=tokenizer, device_map="auto")
+
+
+class TextInput(BaseModel):
+    text: str
 
 
 @app.get("/")
@@ -19,12 +25,11 @@ def check_status():
 
 
 @app.post("/predict")
-def predict(text: str):
-    text2text = pipeline('text2text-generation', model=model, tokenizer=tokenizer, device_map="auto")
-
-    prediction = text2text(text)[0]['generated_text']
-
+def predict(text_input: TextInput):
     try:
+        text = text_input.text
+        prediction = text2text(text)[0]['generated_text']
+
         question = prediction.split("pertanyaan:")[1].split(" jawaban:")[0]
         answer = prediction.split("jawaban:")[1]
 
